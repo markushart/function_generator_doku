@@ -1,0 +1,170 @@
+% --- Dokumententyp ---
+% Dokumententyp scrreprt; deutsch, doppelseitig mit 1cm Bindekorrektur
+\documentclass[BCOR=1cm, twoside, ngerman]{scrreprt}
+
+% --- Präambel ---
+% Erweiterungen einbinden
+\usepackage[utf8]{inputenc}
+\usepackage{babel}
+\usepackage{biblatex}
+\usepackage{cleveref}
+\usepackage[multiple]{footmisc}
+\usepackage{graphicx}
+\usepackage{csquotes}
+
+% Attribute für die Titelseite
+\titlehead{\hfill\includegraphics[width=4cm]{logo.png}} % Das FH-Logo
+\subject{Fachhochschule Bielefeld\\Fachbereich Ingenieurwissenschaften und Mathematik\\Studiengang Ingenieurinformatik}
+\title{Titel der Ausarbeitung}
+\subtitle{Art der Ausarbeitung}
+\author{Name der/s Autors/in bzw. Autoren/innen inkl. Matrikelnummer}
+\date{\today} % Das Datum der Abgabe
+\publishers{Betreuer:\\ Prof. Dr. Axel Schneider\\Dr. Hanno Gerd Meyer}
+
+% Pfad zur bib-Datei mit Literaturquellen
+\bibliography{references.bib}
+
+% --- Dokumentenrumpf ---
+\begin{document}
+% Titelseite erstellen
+\maketitle
+
+% Deutsche und englische Zusammenfassung in abstract-Umgebung
+\begin{abstract}
+Eine kurze deutsche Zusammenfassung.\\
+
+A short abstract in english.
+\end{abstract}
+
+% Erstelle Inhaltsverzeichnis
+\tableofcontents
+
+% - Erstes Kapitel
+\chapter{Erstes Kapitel}
+\label{chp:kapitel1} % Label um auf das Kapitel referenzieren zu können
+Hier wird Literatur zitiert \cite{lion2010}. Man kann auch anders zitieren wie z.B. so: \textcite{wombat2016}, oder nur das Erscheinungsjahr \citeyear{wikibook} nennen. Rest besteht aus Blindtext. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum.
+
+% -- Erster Abschnitt
+\section{Erster Abschnitt}
+\label{sec:abschnitt1} % Label um auf den Abschnitt referenzieren zu können
+Hier wird auf \cref{chp:kapitel1} auf \cpageref{chp:kapitel1} referenziert. Der Rest besteht aus Blindtext. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum
+
+% --- Erster Unterabschnitt
+\subsection{Erster Unterabschnitt}
+\label{subsec:unterabschnitt1} % Label um auf den Unterabschnitt referenzieren zu können
+Hier wird eine Abbildung eingefügt. Der Rest besteht aus Blindtext. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum.
+
+% Abbildung einfügen
+\begin{figure}
+\centering % zentriert die Abbildung
+\includegraphics[width=5cm]{logo.png}
+\caption{Abbildungsbeschreibung}
+\label{fig:logo} % Label um auf die Abbildung referenzieren zu können
+\end{figure}
+
+% --- Zweiter Unterabschnitt
+\subsection{Zweiter Unterabschnitt}
+Hier wird auf \Cref{fig:logo} referenziert. Der Rest besteht aus Blindtext. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum.
+
+% -- Zweiter Abschnitt
+\section{Zweiter Abschnitt}
+Hier werden Fußnoten gesetzt.\footnote{Hier ist eine Fußnote}\footnote{Noch eine Fußnote} Der Rest besteht aus Blindtext. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum.
+
+% - Zweites Kapitel
+\chapter{Zweites Kapitel}
+Ein paar Beispiele für Listen, Aufzählungen und Beschreibungen.
+
+% Beispiel für itemize
+\begin{itemize}
+\item erste Ebene
+  \begin{itemize}
+  \item zweite Ebene
+  \item noch etwas in der zweiten Ebene
+    \begin{itemize}
+    \item dritte Ebene
+      \begin{itemize}
+      \item vierte Ebene
+      \end{itemize} 
+    \item[§] anderes Label in Ebene 3
+    \end{itemize}
+  \end{itemize}
+\item und wieder in der ersten Ebene
+\end{itemize}
+
+\vspace{1cm} % fügt einen vertikalen Leerraum von 1cm ein
+
+% Beispiel für enumerate
+\begin{enumerate}
+\item erste Ebene
+  \begin{enumerate}
+  \item zweite Ebene
+  \item noch etwas in der zweiten Ebene
+    \begin{enumerate}
+    \item dritte Ebene
+      \begin{enumerate}
+      \item vierte Ebene
+      \end{enumerate} 
+    \item wieder in der dritten Ebene
+    \end{enumerate}
+  \end{enumerate}
+\item und wieder in der ersten Ebene
+\end{enumerate}
+
+\vspace{1cm}
+
+% Beispiel für description
+\begin{description}
+\item[Begriff 1] erste Ebene
+  \begin{description}
+  \item[Unterbegriff 1] zweite Ebene
+  \item[Unterbegriff 2] noch etwas in der zweiten Ebene
+    \begin{description}
+    \item[Unterunterbegriff 1] dritte Ebene
+      \begin{description}
+      \item[Unterunterunterbegriff 1] vierte Ebene
+      \end{description} 
+    \item[Unterunterbegriff 2] wieder in der dritten Ebene
+    \end{description}
+  \end{description}
+\item[Begriff 2] und wieder in der ersten Ebene
+\end{description}
+
+% -- Erster Abschnitt im zweiten Kapitel
+\section{Erster Abschnitt}
+Hier gibt es eine Tabelle zu bewundern:
+
+% Tabelle einfügen
+\begin{table}[h] % Der Parameter 'h' bedeutet, dass die Tabelle 'here', also hier gesetzt werden soll
+\label{tab:beispieltabelle} % Label um auf die Tabelle referenzieren zu können
+\caption{Beschreibung der Tabelle}
+\centering
+  \begin{tabular}{|lc|r|}
+    \hline
+    Leistung & 45 & kWh \\
+    \hline
+    Hubraum & $1234$ & $cm^3$ \\
+    \cline{3-3}
+    & $1234$ & $cm^3$ \\
+    Preis & 23499 & Euro \\
+    \hline
+  \end{tabular}
+\end{table}
+
+% --- Erster Unterabschnitt im zweiten Kapitel
+\subsection{Erster Unterabschnitt}
+Die Gleichung $A \cap B = \{ x | x \in A$ und $x \in B \}$ wird \emph{inline} im Text gesetzt. Diese hier nicht:
+
+% Gleichung über equation-Umgebung setzen
+\begin{equation}
+  \int\limits_{a}^{b}f(x)dx
+  = \lim\limits_{n\rightarrow \infty} U_{n}
+  = \lim\limits_{n\rightarrow \infty} \sum\limits_{k=1}^{n}f(x_{k} -1)\Delta x
+\label{eq:bestInt}
+\end{equation}\\
+
+Auch hier kann mit \texttt{\textbackslash cref\{<Label>\}} auf \cref{eq:bestInt} referenziert werden.
+
+% Quellenverzeichnis setzen, welches im Inhaltsverzeichnis als Kapitel erscheinen soll. Der Titel soll 'Literaturverzeichnis' sein.
+\printbibliography[heading=bibintoc, title={Literaturverzeichnis}]
+
+\end{document}

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="124.0" height="61.599999999999994" viewBox="-124.0 -61.599999999999994 248.0 123.19999999999999">
+<defs>
+</defs>
+<rect x="-62.0" y="-30.799999999999997" width="124.0" height="61.599999999999994" fill="white" stroke="black" stroke-width="2" />
+<path d="M-61.0,-25.333333333333332 L-51.4,-20.53333333333333 L-61.0,-15.73333333333333" stroke="black" stroke-width="2" fill="white" />
+<text x="-49.480000000000004" y="-20.53333333333333" font-size="16" font-family="monospace" text-anchor="start" text-decoration="inherit" dy="0.4em">CLK</text>
+<path d="M-61.0,-20.53333333333333" />
+<text x="-61.0" y="-0.0" font-size="16" font-family="monospace" text-anchor="start" text-decoration="overline" dy="0.4em">CE</text>
+<path d="M-61.0,-0.0" />
+<text x="-61.0" y="20.53333333333333" font-size="16" font-family="monospace" text-anchor="start" text-decoration="inherit" dy="0.4em">DIN[12]</text>
+<path d="M-61.0,20.53333333333333" />
+<text x="61.0" y="-20.53333333333333" font-size="16" font-family="monospace" text-anchor="end" text-decoration="inherit" dy="0.4em">JA[4]</text>
+<path d="M61.0,-20.53333333333333" />
+<text x="0.0" y="-33.88" font-size="20" text-anchor="middle" fontsize="20" font-family="monospace" dy="0em">DAC</text>
+</svg>

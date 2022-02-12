@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="104.0" height="183.2" viewBox="-104.0 -183.2 208.0 366.4">
+<defs>
+</defs>
+<path d="M-52.0,133.2 L52.0,91.6 L52.0,-91.6 L-52.0,-133.2 Z" fill="white" stroke="black" stroke-width="2" />
+<text x="-51.0" y="-73.28" font-size="16" font-family="monospace" text-anchor="start" text-decoration="inherit" dy="0.4em">IN0</text>
+<path d="M-51.0,-73.28" />
+<text x="-51.0" y="-36.63999999999999" font-size="16" font-family="monospace" text-anchor="start" text-decoration="inherit" dy="0.4em">IN1</text>
+<path d="M-51.0,-36.63999999999999" />
+<text x="-51.0" y="-0.0" font-size="16" font-family="monospace" text-anchor="start" text-decoration="inherit" dy="0.4em">IN2</text>
+<path d="M-51.0,-0.0" />
+<text x="-51.0" y="36.640000000000015" font-size="16" font-family="monospace" text-anchor="start" text-decoration="inherit" dy="0.4em">IN3</text>
+<path d="M-51.0,36.640000000000015" />
+<text x="-51.0" y="73.28" font-size="16" font-family="monospace" text-anchor="start" text-decoration="inherit" dy="0.4em">SEL[2]</text>
+<path d="M-51.0,73.28" />
+<text x="51.0" y="-0.0" font-size="16" font-family="monospace" text-anchor="end" text-decoration="inherit" dy="0.4em">DOUT</text>
+<path d="M51.0,-0.0" />
+<text x="0.0" y="-128.23999999999998" font-size="20" text-anchor="middle" fontsize="20" font-family="monospace" dy="0em">MUX</text>
+</svg>

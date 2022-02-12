@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="164.0" height="42.4" viewBox="-164.0 -42.4 328.0 84.8">
+<defs>
+</defs>
+<rect x="-82.0" y="-21.2" width="164.0" height="42.4" fill="white" stroke="black" stroke-width="2" />
+<text x="-81.0" y="-10.6" font-size="16" font-family="monospace" text-anchor="start" text-decoration="overline" dy="0.4em">CE</text>
+<path d="M-81.0,-10.6" />
+<text x="-81.0" y="10.599999999999998" font-size="16" font-family="monospace" text-anchor="start" text-decoration="inherit" dy="0.4em">HIGH[12]</text>
+<path d="M-81.0,10.599999999999998" />
+<text x="81.0" y="-10.6" font-size="16" font-family="monospace" text-anchor="end" text-decoration="inherit" dy="0.4em">DOUT[12]</text>
+<path d="M81.0,-10.6" />
+<text x="0.0" y="-23.32" font-size="20" text-anchor="middle" fontsize="20" font-family="monospace" dy="0em">CONSTANT</text>
+</svg>

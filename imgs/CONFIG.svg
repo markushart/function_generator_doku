@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="180.0" height="138.4" viewBox="-180.0 -138.4 360.0 276.8">
+<defs>
+</defs>
+<rect x="-90.0" y="-69.2" width="180.0" height="138.4" fill="white" stroke="black" stroke-width="2" />
+<path d="M-89.0,-64.11428571428571 L-79.4,-59.31428571428572 L-89.0,-54.51428571428572" stroke="black" stroke-width="2" fill="white" />
+<text x="-77.48" y="-59.31428571428572" font-size="16" font-family="monospace" text-anchor="start" text-decoration="inherit" dy="0.4em">CLK</text>
+<path d="M-89.0,-59.31428571428572" />
+<text x="-89.0" y="-39.542857142857144" font-size="16" font-family="monospace" text-anchor="start" text-decoration="overline" dy="0.4em">CE</text>
+<path d="M-89.0,-39.542857142857144" />
+<text x="-89.0" y="-19.771428571428572" font-size="16" font-family="monospace" text-anchor="start" text-decoration="inherit" dy="0.4em">RX</text>
+<path d="M-89.0,-19.771428571428572" />
+<text x="89.0" y="-59.31428571428572" font-size="16" font-family="monospace" text-anchor="end" text-decoration="inherit" dy="0.4em">CYC_TICKS[24]</text>
+<path d="M89.0,-59.31428571428572" />
+<text x="89.0" y="-39.542857142857144" font-size="16" font-family="monospace" text-anchor="end" text-decoration="inherit" dy="0.4em">HIGH[12]</text>
+<path d="M89.0,-39.542857142857144" />
+<text x="89.0" y="-19.771428571428572" font-size="16" font-family="monospace" text-anchor="end" text-decoration="inherit" dy="0.4em">LOW[12]</text>
+<path d="M89.0,-19.771428571428572" />
+<text x="89.0" y="-0.0" font-size="16" font-family="monospace" text-anchor="end" text-decoration="inherit" dy="0.4em">THRESH[24]</text>
+<path d="M89.0,-0.0" />
+<text x="89.0" y="19.771428571428572" font-size="16" font-family="monospace" text-anchor="end" text-decoration="inherit" dy="0.4em">WAVEFORM[2]</text>
+<path d="M89.0,19.771428571428572" />
+<text x="89.0" y="39.542857142857144" font-size="16" font-family="monospace" text-anchor="end" text-decoration="inherit" dy="0.4em">DIRECTION</text>
+<path d="M89.0,39.542857142857144" />
+<text x="89.0" y="59.31428571428573" font-size="16" font-family="monospace" text-anchor="end" text-decoration="inherit" dy="0.4em">TX</text>
+<path d="M89.0,59.31428571428573" />
+<text x="0.0" y="-76.12" font-size="20" text-anchor="middle" fontsize="20" font-family="monospace" dy="0em">CONFIG</text>
+</svg>

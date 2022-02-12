@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="214.0" height="119.2" viewBox="-214.0 -119.2 428.0 238.4">
+<defs>
+</defs>
+<rect x="-107.0" y="-59.6" width="214.0" height="119.2" fill="white" stroke="black" stroke-width="2" />
+<path d="M-106.0,-54.46666666666667 L-96.4,-49.66666666666667 L-106.0,-44.866666666666674" stroke="black" stroke-width="2" fill="white" />
+<text x="-94.48" y="-49.66666666666667" font-size="16" font-family="monospace" text-anchor="start" text-decoration="inherit" dy="0.4em">CLK</text>
+<path d="M-106.0,-49.66666666666667" />
+<text x="-106.0" y="-29.8" font-size="16" font-family="monospace" text-anchor="start" text-decoration="overline" dy="0.4em">CE</text>
+<path d="M-106.0,-29.8" />
+<text x="-106.0" y="-9.93333333333333" font-size="16" font-family="monospace" text-anchor="start" text-decoration="inherit" dy="0.4em">CYC_TICKS[24]</text>
+<path d="M-106.0,-9.93333333333333" />
+<text x="-106.0" y="9.93333333333333" font-size="16" font-family="monospace" text-anchor="start" text-decoration="inherit" dy="0.4em">HIGH[12]</text>
+<path d="M-106.0,9.93333333333333" />
+<text x="-106.0" y="29.800000000000004" font-size="16" font-family="monospace" text-anchor="start" text-decoration="inherit" dy="0.4em">LOW[12]</text>
+<path d="M-106.0,29.800000000000004" />
+<text x="-106.0" y="49.666666666666664" font-size="16" font-family="monospace" text-anchor="start" text-decoration="inherit" dy="0.4em">THRESH[24]</text>
+<path d="M-106.0,49.666666666666664" />
+<text x="106.0" y="-49.66666666666667" font-size="16" font-family="monospace" text-anchor="end" text-decoration="inherit" dy="0.4em">DOUT[12]</text>
+<path d="M106.0,-49.66666666666667" />
+<text x="0.0" y="-65.56" font-size="20" text-anchor="middle" fontsize="20" font-family="monospace" dy="0em">SQUARE_SIGNAL</text>
+</svg>
