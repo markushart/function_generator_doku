@@ -1,2 +1,3 @@
 auto/
-outdir/
+output/
+_*
