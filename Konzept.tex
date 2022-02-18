@@ -1,0 +1,52 @@
+\chapter[Konzept]
+
+Im folgenden soll das Konzept des Funktionsgenerators erläutert werden und
+seine Funktionsweise erklärt werden. 
+ 
+\section{was kann das gerät}
+der generator kann 4 verschiedene Funktionen ausgeben,
+
+\begin{enumerate}
+  \item Konstante 
+    Ein konstanter Wert liegt am Ausgang an.
+  \item Rechteck-Funktion
+    Der Wert wechselt zwischen High- und Low-Pegel in der Frequenz $f$.
+    Der Anteil der Zykluszeit $T$, in dem der Ausgang auf High ist, wird über
+    den dutycycle eingestellt.
+  \item Zick-Zack-Funktion
+    Der Analogwert steigt vom Low-Pegel bis zum High-Pegel linear
+    an, erreicht er den High-Pegel, fällt der Analogwert wieder kontinuierlich
+    auf Low ab. Somit schwankt der Pegel mit der Frequenz $f$.
+  \item Rampen-Funktion 
+    Der Analogwert wächst, wie bei der Zick-Zack-Funktion, linear bis auf High
+    an, dann fällt er aber auf Low zurück. Alternativ kann die Rampe auch vom
+    High-Pegel her abfallen und bei Erreichen von Low wieder auf High zurück springen.
+\end{enumerate}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}[b]{0.2\textwidth}
+      \centering
+    \includesvg[width=6cm]{constant_function}
+    \label{constant_function_graph}
+  \end{subfigure}
+  \hfil
+  \begin{subfigure}[b]{0.2\textwidth}
+    \centering
+    \includesvg[width=6cm]{square_function}
+    \label{square_function_graph}
+  \end{subfigure}
+  \vfil
+  \begin{subfigure}[b]{0.2\textwidth}
+    \centering
+    \includesvg[width=6cm]{zigzag_function}
+    \label{zigzag_function_graph}
+  \end{subfigure}
+  \hfil
+  \begin{subfigure}[b]{0.2\textwidth}
+    \centering
+    \includesvg[width=6cm]{ramp_function}
+    \label{ramp_function_graph}
+  \end{subfigure}
+  \hfil
+\end{figure}
