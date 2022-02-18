@@ -1,3 +1,5 @@
 auto/
 output/
-_*
+!./main.tex
+!./main.pdf
+main.*
