@@ -20,6 +20,9 @@
 % für svg bilder:
 \usepackage{svg}
 
+% formatierung von code im text:
+\newcommand{\code}[1]{\texttt{#1}}
+
 % Attribute für die Titelseite
 \titlehead{\hfill\includegraphics[width=4cm]{logo.png}} % Das FH-Logo
 \subject{Fachhochschule Bielefeld\\Fachbereich Ingenieurwissenschaften und Mathematik\\Studiengang Ingenieurinformatik}
@@ -53,7 +56,7 @@ A short abstract in english.
 \input{Einleitung}
 % Hauptteil
 \input{Konzept}
-% \input{Komponenten}
+\input{Komponenten}
 % \input{Clocking}
 %Schluss
 % \input{Fazit}

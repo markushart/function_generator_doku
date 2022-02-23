@@ -1,0 +1,70 @@
+\chapter{Komponenten}
+In diesem Kapitel soll der Aufbau des Funktionsgenerators anhand seiner
+digitaltechnischen Komponenten erläutert werden.
+
+\section{Arithmetik}
+
+\subsection{Zähler}
+\subsection{Teiler}
+Während beim Multiplizieren, Addieren und Subtrahieren auf Standardfunktionen
+zurückgegriffen wird, wird für die Division zweier Binärzahlen eine eigene
+Komponente entworfen. Die Gründe hierfür werden in \cref{Comp:Func:ZigZag}
+erläutert. 
+
+\section{Takterzeugung}
+\subsection{Clock-Enable}
+
+\section{Funktionen}   \label{Comp:Func}
+\subsection{Konstante}   \label{Comp:Func:Const}
+\subsection{Rechteck}   \label{Comp:Func:Square}
+\subsection{Zick-Zack}  \label{Comp:Func:ZigZag}
+
+\subsection{Rampe} \label{Comp:Func:Ramp}
+
+\section{Konfigurationsschnittstelle}
+Die Konfigurationsschnittstelle \code{CONFIG\_INTERFACE} besteht aus einer
+UART-Schnittstelle, über die der Datenaustausch zwischen Benutzer und
+Funktionsgenerator erfolgt, sowie der Instruktionsauswertung, die die
+empfangenen UART-Signale in Konfigurationsbefehle übersetzt.
+\subsection{UART-Schnittstelle}
+Die UART-Schnittstelle beruht auf dem
+\textbf{U}niversal-\textbf{A}synchronous-\textbf{R}ceiver-\textbf{T}ransmission-Protokoll.
+Das Protokoll ermöglicht es, byteweise serielle Daten zu verschicken und zu
+empfangen. Hierfür reichen zwei Drähte aus, die jeweils eins der beiden Signale
+RX (Receive) und TX (Transmit) transportieren. Zum Start der Kommunikation wird
+die RX Leitung vom Sender von high auf low gezogen, sodass der Empfänger anfängt
+die nachfolgenden acht Bits zu einem Byte zusammenzusetzen. Anschließend muss
+mindestens ein Stop-Bit folgen, bei dem die Receive Leitung des Empfängers auf
+High liegt. Darauf kann je, nach Implementierung, noch ein Stop-Bit sowie
+ein Paritätsbit folgen. Da es zwischen dem Sender und Empfänger kein synchrones
+Taktsignal gibt, ist es wichtig, dass ihre Sende- und Empfangsfrequenz gleich
+ist. Diese Frequenz ist die sogenannte Baudrate. Im Funktionsgenerator ist sie
+auf 115200 Bits / s festgelegt. Die im Generator verwendete Schnittstelle wurde,
+um den Arbeitsaufwand zu verringern, aus einer Vorlage übernommen (Quelle). Sie
+beinhaltet sowohl eine Empfänger- als auch eine Sender-Komponente. Es gibt
+folgende Eingangssignale:
+\begin{enumerate}
+\item \code{CLK}: Eingang, gibt die Taktfrequenz der Komponente vor
+\item \code{CE}: Eingang, ''chip-enable``-Signal, aktiviert die Komponente wenn es auf
+  low gesetzt wird
+\item \code{reset}: Eingang, die Schnittstelle wird auf den Initialisierungszustand
+  zurückgesetzt und die aktuelle Übertragung bzw. aktuelle Empfangsprozesse
+  werden abgebrochen.
+
+\item \code{tx}: Ausgang, Das von der Schnittstelle versendete TX-Signal 
+  \item \code{tx\_start}: Eingang, wenn \code{tx\_start} auf high gesetzt wird, wird mit der
+    Übertragung von \code{data\_in} begonnen
+\item \code{data\_in}: Eingang, ein 8-Bit breites Signal, dass das zu versendende Byte enthält.
+
+\item \code{rx}: Eingang, das von der Schnittstelle empfangene RX-Signal
+\item \code{data\_out}: Ausgang, ein 8-Bit breites Signal, dass das zuletzt von der
+  Schnittstelle empfangene Byte beinhaltet.
+\item \code{rx\_uart\_rdy}: Ausgang, dieses Signal zeigt an, wenn ein komplettes Byte
+  empfangen wurde und bereit ist, gelesen zu werden.
+\end{enumerate}
+  
+\subsection{Instruktionsauswertung}
+
+\section{DAC-Konverter}
+\subsection{DAC-Kanal}
+
