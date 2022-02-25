@@ -3,21 +3,119 @@ In diesem Kapitel soll der Aufbau des Funktionsgenerators anhand seiner
 digitaltechnischen Komponenten erläutert werden.
 
 \section{Arithmetik}
+Der Funktionsgenerator braucht für die richtige Berechnung des Ergebnisses Komponenten, mit deren Hilfe mathematische Operationen ausgeführt werden können.
+Zum Addieren, Subtrahieren und Multiplizieren vorzeichenloser Zahlen können die VHDL Standardfunktionen des Datentyps \code{unsigned} verwendet werden.
+Darüber hinaus benötigte Funktionen, die über eine eigene Implementierung verfügen, werden im Folgenden vorgestellt.
 
-\subsection{Zähler}
-\subsection{Teiler}
+\subsection{Zähler} \label{Comp:Arith:Count}
+Der Zähler bildet die Basiskomponente der Funktionskomponenten. Er eignet sich sehr gut, um die Zeit zu messen, da sich die Zeit seit dem letzten Rücksetzen des Zählers $T_{R}$ immer aus dem Zählstand $N$ und der Taktzeit des Zählers $T_{count}$ berechnen lässt: $T_{R} = N \cdot T_{count}$. So kann durch wiederholtes Rücksetzen des Zählers bei einem bestimmten Zählstand ein zyklischer Funktionsverlauf erstellt werden.
+Der Zählstand selbst dient in diesem Fall als diskrete X-Komponente, der dann von der Funktionskomponente ein Y-Wert zugeordnet wird.
+Der hier implementierte Zähler kann allerdings schon selbst als Funktionskomponente mit dem Ausgang $o\_count$ für die Funktion $o\_count = inc \cdot N \cdot (-1) ^ {1 - D}, N \in \{0, 1, 2, \dots, max\_ticks\}$ gesehen werden.
+Die Komponente besitzt nämlich die Eingänge \code{inc}, \code{D} und \code{max\_ticks}. Diese erfüllen folgende Aufgabe:
+\begin{itemize}
+\item \code{max\_ticks}: Bit-Vektor, der den maximalen Wert repräsentiert, ab dem der Zähler automatisch zurückgesetzt wird.
+Diese Funktion erleichtert es, die Zykluszeit einer Funktion $T_{func}$ als Zeitraum zwischen zwei Rücksetzungen festzulegen: $T_{func} = max_{ticks} \cdot T_{func}$
+\item \code{D}: Richtung, in die der Zähler Zählen soll: 0 heißt aufwärts, 1 heißt abwärts
+  \item \code{inc}: Bit-Vektor, er repräsentiert das Inkrement, um das der Zähler hoch- bzw. runterzählen soll
+\end{itemize}
+
+Der maximale Zählstand ist durch die Anzahl der Stellen von \code{o\_count} beschränkt. Sie kann generisch durch den Wert \code{data\_width} bestimmt werden. \\
+Würde es im nächsten Takt dazu kommen, dass der Zählstand größer als \code{max\_ticks} wird (Überlauf), setzt er sich automatisch wieder auf Null zurück.
+Würde es im nächsten Takt dazu kommen, dass der Zählstand kleiner als Null wird (Unterlauf), wird der Zähler auf \code{max\_ticks} zurückgesetzt.
+Zusätzlich kann der Zähler asynchron auf Null gesetzt werden, wenn der Eingang \code{R} auf 0 gesetzt wird.
+
+
+\subsection{Teiler} \label{Comp:Arith:Division}
 Während beim Multiplizieren, Addieren und Subtrahieren auf Standardfunktionen
 zurückgegriffen wird, wird für die Division zweier Binärzahlen eine eigene
 Komponente entworfen. Die Gründe hierfür werden in \cref{Comp:Func:ZigZag}
-erläutert. 
+erläutert. \\ % Quelle: https://en.wikipedia.org/wiki/Division_algorithm
+Diese Komponente kann die Division des Zählers $Z$ durch den Nenner $N$
+lösen, dabei sind $Z$ und $N$ zwei Binärzahlen mit gleicher
+Stellenanzahl und ohne Vorzeichen. Das Ergebnis ist der Quotient $Q$ und der Rest $R$. Der Algorithmus, den die Komponente ausführt, ermittelt dabei pro Rechenschritt (d.h. pro Takt) eine Stelle des Ergebnisses.
+Er geht den Zähler von der größten bis zur kleinsten Stelle durch und schiebt die immer die aktuelle Stelle $Z(i)$ in den Rest, sodass der neue Rest im binären $R' = R \cdot 2 + Z(i)$ ist.
+Immer wenn der Rest größer wird als der Nenner, ist das Ergebnis der Division größer Null, also wird der neue Rest durch Subtraktion mit dem Nenner gebildet: $R'' = R' - N$.
+Ist eine Subtraktion möglich, ist $Q$ an dieser Stelle Eins, ansonsten ist $Q$ Null. Der nachfolgende Pseudocode verdeutlicht den Algorithmus noch einmal.
+Es gilt dabei aber zu beachten, dass alle Schritte innerhalb der Schleife in einem Takt ausgeführt werden können, da es sich bei der Komponente um eine digitale Schaltung handelt.
+
+\begin{verbatim}
+Beginn des Algorithmus
+// verhindern, dass durch 0 geteilt wird:
+wenn N ungleich 0, dann
+    setze Q = 0
+    setze R = 0
+    zähle i von n - 1 bis 0 runter  // n ist die Anzahl der Bits in N
+        schiebe R um 1 Bit nach links
+        // letzte Stelle von R wird ite Stelle des Zählers:
+        R(0) = Z(i)                    
+        wenn R >= N, dann               
+            setze R = R - N
+            setze Q(i) = 1  // ite Stelle des Quotienten wird 1 
+        Ende der bedingten Anweisung
+    springe zum Anfang der Schleife
+Ende der bedingten Anweisung
+Ende des Algorithmus
+\end{verbatim}
 
 \section{Takterzeugung}
-\subsection{Clock-Enable}
+Da die Einzelkomponenten des Funktionsgenerators in verschiedenen Geschwindigkeiten arbeiten, braucht es Komponenten für das Clock-Management. 
+\subsection{Clock-Enable} \label{Comp:Tact:ClkEn}
+Um aus dem Systemtakt Takte mit niedrigerer Frequenz zu erzeugen, wird die Komponente \code{SCLK\_ENABLE} verwendet.
+Der Takt wird geteilt, indem ein sogenanntes Enable-Signal \code{SCLK\_EN} erzeugt wird, das die jeweils nte steigende Flanke des Systemtakts mit \code{low} maskiert.
+Der Eingang \code{CE} der Komponente, die im erzeugten Takt arbeiten soll, wird an \code{SCLK\_EN} angeschlossen, so dass die Komponente nur dann aktiv ist, wenn eine steigende Flanke detektiert wurde und \code{CE=0} anliegt.
+Das Timingdiagram in Abbildung \cref{Comp:Tact:ClkEn:Timing} verdeutlicht, auf welche Taktzyklen die angeschlossene Komponente reagiert.
+Der große Vorteil dieser Methode liegt darin, dass jede Komponente weiterhin direkt an den Systemtakt angeschlossen ist und dieser somit nicht durch zwischengeschaltete Komponenten verzögert wird.
+\vfill
+\begin{tikztimingtable} 
+  CLK                             & H 9{2L 2H} L    \\
+  $\overline{\mbox{CLK\_Enable}}$ & H 3{4L 8H} L    \\
+  aktive Zyklen                   & 3L 3{2H 10L} L  \\
+  \extracode
+  \tablerules
+  \begin{pgfonlayer}{background}
+    \foreach \n in {1, ..., 8}
+    \draw [help lines] (A\n) -- (B\n);
+  \end{pgfonlayer}
+
+\end{tikztimingtable}
+\captionof{tikztimingtable}{Beispielhaftes Timing-Diagramm. Jeder vierte Taktzyklus wird durch \lowactive{CLK\_Enable} aktiviert.} \label{Comp:Tact:ClkEn:Timing}
+
 
 \section{Funktionen}   \label{Comp:Func}
+Die Herzstücke des Funktionsgenerators bilden seine Funktionskomponenten.
+An ihren Ausgängen liegen die von ihnen berechneten Werte an, von denen einer zum in \cref{Comp:DAC} beschriebenen DAC-Konverter per Multiplexer weitergeleitet wird.
+Bis auf die Konstante verfügen alle Komponenten, neben den üblichen \code{CLK} und \lowactive{CE} Eingängen, über folgende Anschlüsse:
+
+\begin{itemize}
+\item \code{cyc\_ticks}: Eingang, dieser Bit-Vektor legt die Periodendauer einer Funktionskomponente fest.
+\item \code{high}: Eingang, dieser Bit-Vektor legt den maximal erreichbaren Wert des Komponentenausgangs fest.
+\item \code{y\_out}: Ausgang, der digitale Funktionswert, der zum DAC geschickt wird
+\end{itemize}
+
+Alle Komponenten außer der Konstante verfügen über einen Zähler und eine Clock-Enable-Komponente, die die Geschwindigkeit des Zählers steuert.
+Darüber hinaus können sie noch über drei generische Größen konfiguriert werden:
+
+\begin{itemize}
+\item \code{data\_width}: legt die Bitbreite des \code{high}, \code{low} und \code{y\_out} Signals fest.
+Bei allen Funktionen ist diese auf zwölf eingestellt, da es sich beim DAC-Wandler um einen 12-Bit-Konverter handelt.
+\item \code{clk\_width}: legt die Bitbreite von \code{cyc\_ticks} und \code{thresh} fest.
+  Diese muss größer als \code{data\_width} sein.
+  Die \code{clk\_width} legt fest, welche Periodendauer maximal erreicht werden kann, da sie den maximal möglichen Zählerstand begrenzt.
+\item \code{clk\_ticks\_per\_count}: Dies ist der Teilungsfaktor zwischen dem angelegten Takt und dem Takt, mit dem der interne Zähler hochzählt.
+\end{itemize}
+
+
 \subsection{Konstante}   \label{Comp:Func:Const}
+Die konstante Funktion ist die einfachste der vier Funktionskomponenten.
+Sie gibt lediglich den an ihr anliegenden high-Wert auf ihrem Ausgang aus.
+Sie verfügt darüber hinaus noch über den Eingang \lowactive{CE}, der bewirkt, dass der Ausgang asynchron auf 0 gesetzt wird.
 \subsection{Rechteck}   \label{Comp:Func:Square}
+Die Rechteckfunktion verfügt über einen Eingang \code{thresh}, der mit dem Stand des internen Zählers verglichen wird.
+Ist der Zähler größer als \code{thresh}, so wird der Ausgang auf den Wert \code{high} gesetzt, ansonsten ist er auf den Wert \code{low} eingestellt.
+Der \code{low}-Wert liegt als weiteres Eingangssignal an.
+
 \subsection{Zick-Zack}  \label{Comp:Func:ZigZag}
+
 
 \subsection{Rampe} \label{Comp:Func:Ramp}
 
@@ -32,14 +130,16 @@ Die UART-Schnittstelle beruht auf dem
 Das Protokoll ermöglicht es, byteweise serielle Daten zu verschicken und zu
 empfangen. Hierfür reichen zwei Drähte aus, die jeweils eins der beiden Signale
 RX (Receive) und TX (Transmit) transportieren. Zum Start der Kommunikation wird
-die RX Leitung vom Sender von high auf low gezogen, sodass der Empfänger anfängt
-die nachfolgenden acht Bits zu einem Byte zusammenzusetzen. Anschließend muss
-mindestens ein Stop-Bit folgen, bei dem die Receive Leitung des Empfängers auf
-High liegt. Darauf kann je, nach Implementierung, noch ein Stop-Bit sowie
+die RX Leitung vom Sender von high auf low gezogen. Der Empfänger detektiert
+dieses Startsignal und fängt an, die nachfolgenden acht Bits zu einem Byte
+zusammenzusetzen.
+Wurde ein Byte übertragen, muss mindestens ein Stop-Bit folgen, bei dem die Receive Leitung des Empfängers auf
+High liegt. Darauf kann, je nach Implementierung, noch ein Stop-Bit sowie
 ein Paritätsbit folgen. Da es zwischen dem Sender und Empfänger kein synchrones
 Taktsignal gibt, ist es wichtig, dass ihre Sende- und Empfangsfrequenz gleich
 ist. Diese Frequenz ist die sogenannte Baudrate. Im Funktionsgenerator ist sie
-auf 115200 Bits / s festgelegt. Die im Generator verwendete Schnittstelle wurde,
+auf 115200 Bits / s festgelegt. \\
+Die im Generator verwendete Schnittstelle wurde,
 um den Arbeitsaufwand zu verringern, aus einer Vorlage übernommen (Quelle). Sie
 beinhaltet sowohl eine Empfänger- als auch eine Sender-Komponente. Es gibt
 folgende Eingangssignale:
@@ -47,9 +147,7 @@ folgende Eingangssignale:
 \item \code{CLK}: Eingang, gibt die Taktfrequenz der Komponente vor
 \item \code{CE}: Eingang, ''chip-enable``-Signal, aktiviert die Komponente wenn es auf
   low gesetzt wird
-\item \code{reset}: Eingang, die Schnittstelle wird auf den Initialisierungszustand
-  zurückgesetzt und die aktuelle Übertragung bzw. aktuelle Empfangsprozesse
-  werden abgebrochen.
+\item \code{reset}: Eingang, die Schnittstelle wird auf den Initialisierungszustand zurückgesetzt und die aktuelle Übertragung bzw. aktuelle Empfangsprozesse werden abgebrochen.
 
 \item \code{tx}: Ausgang, Das von der Schnittstelle versendete TX-Signal 
   \item \code{tx\_start}: Eingang, wenn \code{tx\_start} auf high gesetzt wird, wird mit der
@@ -57,14 +155,13 @@ folgende Eingangssignale:
 \item \code{data\_in}: Eingang, ein 8-Bit breites Signal, dass das zu versendende Byte enthält.
 
 \item \code{rx}: Eingang, das von der Schnittstelle empfangene RX-Signal
-\item \code{data\_out}: Ausgang, ein 8-Bit breites Signal, dass das zuletzt von der
-  Schnittstelle empfangene Byte beinhaltet.
+\item \code{data\_out}: Ausgang, ein 8-Bit breites Signal, dass das zuletzt von der Schnittstelle empfangene Byte beinhaltet.
 \item \code{rx\_uart\_rdy}: Ausgang, dieses Signal zeigt an, wenn ein komplettes Byte
   empfangen wurde und bereit ist, gelesen zu werden.
 \end{enumerate}
   
 \subsection{Instruktionsauswertung}
 
-\section{DAC-Konverter}
+\section{DAC-Konverter} \label{Comp:DAC}
 \subsection{DAC-Kanal}
 
