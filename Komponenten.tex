@@ -88,8 +88,9 @@ Bis auf die Konstante verfügen alle Komponenten, neben den üblichen \code{CLK}
 
 \begin{itemize}
 \item \code{cyc\_ticks}: Eingang, dieser Bit-Vektor legt die Periodendauer einer Funktionskomponente fest.
-\item \code{high}: Eingang, dieser Bit-Vektor legt den maximal erreichbaren Wert des Komponentenausgangs fest.
-\item \code{y\_out}: Ausgang, der digitale Funktionswert, der zum DAC geschickt wird
+\item \code{high}: Eingang, dieser Bit-Vektor legt den maximalen Wert des Komponentenausgangs fest.
+\item \code{low}: Eingang, dieser Bit-Vektor legt den minimalen Wert des Komponentenausgangs fest.
+\item \code{y\_out}: Ausgang, Bit-Vektor, der den digitalen Funktionswert, der zum DAC geschickt wird repräsentiert
 \end{itemize}
 
 Alle Komponenten außer der Konstante verfügen über einen Zähler und eine Clock-Enable-Komponente, die die Geschwindigkeit des Zählers steuert.
@@ -109,15 +110,29 @@ Bei allen Funktionen ist diese auf zwölf eingestellt, da es sich beim DAC-Wandl
 Die konstante Funktion ist die einfachste der vier Funktionskomponenten.
 Sie gibt lediglich den an ihr anliegenden high-Wert auf ihrem Ausgang aus.
 Sie verfügt darüber hinaus noch über den Eingang \lowactive{CE}, der bewirkt, dass der Ausgang asynchron auf 0 gesetzt wird.
+
 \subsection{Rechteck}   \label{Comp:Func:Square}
 Die Rechteckfunktion verfügt über einen Eingang \code{thresh}, der mit dem Stand des internen Zählers verglichen wird.
-Ist der Zähler größer als \code{thresh}, so wird der Ausgang auf den Wert \code{high} gesetzt, ansonsten ist er auf den Wert \code{low} eingestellt.
-Der \code{low}-Wert liegt als weiteres Eingangssignal an.
+Ist der Zähler größer als \code{thresh}, so wird der Ausgang auf den Wert \code{low} gesetzt, ansonsten ist er auf den Wert \code{high} eingestellt.
 
 \subsection{Zick-Zack}  \label{Comp:Func:ZigZag}
+Die Zick-Zack-Funktion besteht aus einer von \code{low} zu \code{high} ansteigenden Treppenfunktion, die anschließend wieder zu \code{low} abfällt.
+Sie erreicht dies, indem sie die Zählrichtung (\code{D}) ihres internen Zählers invertiert, sobald ihr Zählwert \code{count} die Hälfte von \code{cyc\_ticks} erreicht.
+Der Zählstand könnte im Prinzip so an den Ausgang ausgegeben werden, allerdings ist die Bitbreite des Funktionswerts geringer als die Bitbreite des Zählstands.
+Dazu kommt, dass der Zähler von 0 bis $\code{cyc\_ticks} / 2$ zählt, während der Ausgang einen Wertebereich von \code{low} bis \code{high} hat.
+Darum muss der Wert des internen Zählers auf die Breite 12 Bit konvertiert werden. Allgemein lautet die Berechnung dafür:
+
+$$ y\_out = \frac{(high - low) \cdot count}{cyc\_ticks / 2} $$
+
+Für die Division sorgt der in Abschnitt \cref{Comp:Arith:Division} beschriebenen Teiler.
+Dieser  muss das Ergebnis Takt für Takt berechnen, da bei der Implementierung festgestellt wurde, dass die standardmäßige Division aus der \code{unsigned}-Bibliothek zu langsam gewesen wäre.
 
 
 \subsection{Rampe} \label{Comp:Func:Ramp}
+Die Rampenfunktion funktioniert genau so wie die Zick-Zack-Funktion, bis auf  dass das Umkehren von \code{D} wegfällt und der Zähler dafür bis \code{cyc\_ticks} hochzählt und schließlich wieder auf \code{low} zurückgesetzt wird.
+Dadurch ergibt sich das typische Sägezahnmuster.
+Der zusätzliche Eingang \code{dir} kann noch dazu genutzt werden, die Richtung des Flankenanstiegs umzukehren.
+\code{Dir} ist einfach direkt mit dem Eingang \code{D} des Zählers verbunden und steuert durch die Zählrichtung die Flankensteigung
 
 \section{Konfigurationsschnittstelle}
 Die Konfigurationsschnittstelle \code{CONFIG\_INTERFACE} besteht aus einer
