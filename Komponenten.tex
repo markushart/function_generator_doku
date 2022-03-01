@@ -1,6 +1,14 @@
 \chapter{Komponenten}
 In diesem Kapitel soll der Aufbau des Funktionsgenerators anhand seiner
 digitaltechnischen Komponenten erläutert werden.
+Ihre Verschaltung im Generator ist in \cref{Comp:FuncGenDia} zu sehen.
+Hier kann man gut erkennen, dass die verschiedenen Funktionen parallel arbeiten und von der Konfigurationsschnittstelle gesteuert werden.
+Diese sorgt auch dafür, dass die gewünschte Funktionskomponente auf den Ausgang durchgeschaltet wird.
+
+\begin{figure}[h]
+  \includesvg[width=14cm]{function_generator}
+  \caption{Diagramm des Funktionsgenerators, zusammengesetzt aus seinen Einzelkomponenten}  \label{Comp:FuncGenDia}
+\end{figure}
 
 \section{Arithmetik}
 Der Funktionsgenerator braucht für die richtige Berechnung des Ergebnisses Komponenten, mit deren Hilfe mathematische Operationen ausgeführt werden können.
@@ -22,7 +30,7 @@ Diese Funktion erleichtert es, die Zykluszeit einer Funktion $T_{func}$ als Zeit
 Der maximale Zählstand ist durch die Anzahl der Stellen von \code{o\_count} beschränkt. Sie kann generisch durch den Wert \code{data\_width} bestimmt werden. \\
 Würde es im nächsten Takt dazu kommen, dass der Zählstand größer als \code{max\_ticks} wird (Überlauf), setzt er sich automatisch wieder auf Null zurück.
 Würde es im nächsten Takt dazu kommen, dass der Zählstand kleiner als Null wird (Unterlauf), wird der Zähler auf \code{max\_ticks} zurückgesetzt.
-Zusätzlich kann der Zähler asynchron auf Null gesetzt werden, wenn der Eingang \code{R} auf 0 gesetzt wird.
+Zusätzlich kann der Zähler asynchron auf Null gesetzt werden, wenn der Eingang \lowactive{R} auf 0 gesetzt wird.
 
 
 \subsection{Teiler} \label{Comp:Arith:Division}
@@ -65,7 +73,8 @@ Der Takt wird geteilt, indem ein sogenanntes Enable-Signal \code{SCLK\_EN} erzeu
 Der Eingang \code{CE} der Komponente, die im erzeugten Takt arbeiten soll, wird an \code{SCLK\_EN} angeschlossen, so dass die Komponente nur dann aktiv ist, wenn eine steigende Flanke detektiert wurde und \code{CE=0} anliegt.
 Das Timingdiagram in Abbildung \cref{Comp:Tact:ClkEn:Timing} verdeutlicht, auf welche Taktzyklen die angeschlossene Komponente reagiert.
 Der große Vorteil dieser Methode liegt darin, dass jede Komponente weiterhin direkt an den Systemtakt angeschlossen ist und dieser somit nicht durch zwischengeschaltete Komponenten verzögert wird.
-\vfill
+
+\begin{figure}
 \begin{tikztimingtable} 
   CLK                             & H 9{2L 2H} L    \\
   $\overline{\mbox{CLK\_Enable}}$ & H 3{4L 8H} L    \\
@@ -78,7 +87,8 @@ Der große Vorteil dieser Methode liegt darin, dass jede Komponente weiterhin di
   \end{pgfonlayer}
 
 \end{tikztimingtable}
-\captionof{tikztimingtable}{Beispielhaftes Timing-Diagramm. Jeder vierte Taktzyklus wird durch \lowactive{CLK\_Enable} aktiviert.} \label{Comp:Tact:ClkEn:Timing}
+\caption{Beispielhaftes Timing-Diagramm. Jeder vierte Taktzyklus wird durch \lowactive{CLK\_Enable} aktiviert.} \label{Comp:Tact:ClkEn:Timing}
+\end{figure}
 
 
 \section{Funktionen}   \label{Comp:Func}
@@ -134,7 +144,7 @@ Dadurch ergibt sich das typische Sägezahnmuster.
 Der zusätzliche Eingang \code{dir} kann noch dazu genutzt werden, die Richtung des Flankenanstiegs umzukehren.
 \code{Dir} ist einfach direkt mit dem Eingang \code{D} des Zählers verbunden und steuert durch die Zählrichtung die Flankensteigung
 
-\section{Konfigurationsschnittstelle}
+\section{Konfigurationsschnittstelle} \label{Comp:Conf}
 Die Konfigurationsschnittstelle \code{CONFIG\_INTERFACE} besteht aus einer
 UART-Schnittstelle, über die der Datenaustausch zwischen Benutzer und
 Funktionsgenerator erfolgt, sowie der Instruktionsauswertung, die die
@@ -175,8 +185,58 @@ folgende Eingangssignale:
   empfangen wurde und bereit ist, gelesen zu werden.
 \end{enumerate}
   
-\subsection{Instruktionsauswertung}
+\subsection{Instruktionsauswertung} \label{Comp:Conf:Inst}
+Die vom Nutzer gesendeten Bytes werden in einem vier Byte großem Schieberegister gespeichert.
+Das erste dieser vier Byte repräsentiert das Befehlsbyte, das steuert, welchen Befehl das Interface ausführt.
+Die folgenden drei Byte sind die Argumente des Befehls. In \cref{Comp:Conf:Inst:Tab} sind alle Befehle, ihre Funktion und die Position der Argumente im Speicher beschrieben.
+Beispielsweise kann der \code{high}-Wert der Funktionen mit dem Befehl \code{0x01000FFF} auf das Maximum der Ausgangsspannung gesetzt werden.
+Dabei ist darauf zu achten, dass für das Argument nur der Wert der Bits Null bis Elf verwendet wird (Bit Null ist das LSB) und die Bits 12 bis 23 ignoriert werden.
+
+\begin{table}
+  \centering
+  \begin{tabular}[h]{|l|r|r|l|}
+    \hline
+    Befehlsname & Hex-Code & Argumentbits & Funktion\\ \hline
+     SETCYCTICKS      & 0x01 & 23 - 0 & \makecell[l]{ändern der Zykluszeit der \\ aktuellen Funktion}\\ \hline
+    SETHIGH      & 0x02 & 11 - 0 & \makecell[l]{ändern des \code{high} Werts}\\ \hline
+    SETLOW      & 0x03 & 11 - 0&  \makecell[l]{ändern des \code{low} Werts}\\\hline
+    SETDUTYCYCLE      & 0x04 & 7 - 0&  \makecell[l]{ändern des dutycycles \\der Rechteckfunktion} \\ \hline
+    SETWVFRM      & 0x05 & 1 - 0& \makecell[l]{ändern der Funktion}\\ \hline
+    SETDIR      & 0x06 & 0 & \makecell[l]{ändern der Richtung \\der Rampenfunktion}\\ \hline
+  \end{tabular}
+  \caption{Befehlssatz inklusive Funktion der Befehle.} \label{Comp:Conf:Inst:Tab}
+\end{table}
 
 \section{DAC-Konverter} \label{Comp:DAC}
-\subsection{DAC-Kanal}
+Um den digital berechneten Ausgangswert in ein analoges Signal umzuwandeln, braucht es eine Komponente, die auf dem Basys3-Board noch nicht vorhanden ist.
+Hier kommt der digital zu analog Wandler PmodDA2 der Firma Digilent zum Einsatz.
+Dieser DAC verfügt über zwei DAC121S101-ICs von Texas Instruments die als jeweils ein Kanal die seriell empfangenen zwölf Bit Werte in eine analoge Spannung umwandeln (vgl. Datenblatt).
+Von diesen Kanälen sind zwei im Funktionsgenerator implementiert, es soll aber zunächst nur einer zum Einsatz kommen.
+Der Chip verfügt über ein Kommunikationsprotokoll ähnlich dem SPI-Protokoll.
+Es gibt ein \code{\lowactive{SYNC}} Signal, vergleichbar mit dem \code{\lowactive{SS}} Signal von SPI, ein \code{CLK} Signal und zwei Datenleitungen \code{DINA} und \code{DINB} für Kanal Eins und Zwei.
+
+\subsection{DAC-Kanal} \label{Comp:DAC:Channel}
+Ein einzelner Kanal kümmert sich um die Serialisierung des anliegenden zwölf Bit Werts \code{DATA\_in}.
+Ergänzend zu den zwölf Datenbits können dem gesendeten Wort noch zwei Bit für Zusatzfunktionen des Wandlers mitgeschickt werden.
+Für diese Implementation werden sie allerdings auf \code{low} gehalten, so dass der DAC im Normalbetrieb läuft.
+Zusätzlich werden die ersten beiden gesendeten Bits ignoriert, innerhalb einer Übertragung werden also 16 Bit geschickt.
+Das Senden ist dann erfolgreich, wenn das \code{\lowactive{SYNC}} Signal 16 DAC-Takte lang auf \code{low} gehalten wurde. Sodann liegt am analogen Ausgang die entsprechende Spannung an.
+
+\begin{figure}
+  \centering
+  \begin{tikztimingtable} 
+    CLK                      & 34{C}                        \\
+    $\overline{\mbox{SYNC}}$ & H 32L H                      \\
+    DINA                     & 5X 4L 6L 2H 4L 2H 2L 4L 4H L \\
+    \extracode
+    \tablerules
+    \begin{pgfonlayer}{background}
+      \foreach \n in {1, ..., 8}
+      \draw [help lines] (A\n) -- (B\n);
+    \end{pgfonlayer}
+
+  \end{tikztimingtable}
+  \caption{Signalverlauf bei der Übertragung des Werts 0x123 an den Kanal A des DACs} \label{Comp:DAC:Channel:Protocoll}
+\end{figure}
+
 
