@@ -23,14 +23,19 @@
 % tikz pakete für die Erstellung von plots:
 \usepackage{tikz}
 \usepackage{tikz-timing} % für timing-diagramme:
-
+\usepackage{pgfplots}
+\pgfplotsset{compat=newest}
 % für svg bilder:
 \usepackage{svg}
 
 % formatierung von code im text:
 \newcommand{\code}[1]{\texttt{#1}}
+% formatierung von bit vektoren, digitalen werten und analogen Werten
+\newcommand{\bit}[1]{\code{#1}}
+\newcommand{\bitvect}[1]{\code{#1}}
+\newcommand{\analog}[1]{\code{#1}}
 % low-activ Signal:
-\newcommand{\lowactive}[1]{$\overline{\code{#1}}$}
+\newcommand{\lowactive}[1]{$\overline{\bit{#1}}$}
 
 % Attribute für die Titelseite
 \titlehead{\hfill\includegraphics[width=4cm]{logo.png}} % Das FH-Logo
@@ -51,7 +56,10 @@
 
 % Deutsche und englische Zusammenfassung in abstract-Umgebung
 \begin{abstract}
-Eine kurze deutsche Zusammenfassung.\\
+  In dieser Studienarbeit wird die Implementation eines Funktionsgenerators mithilfe der Hardwarebeschreibungssprache VHDL geschildert.
+  Der Aufbau des Generators wird erläutert sowie seine korrekte Funktion überprüft.
+  Darüber hinaus werden seine Leistungsdaten erfasst und dargelegt.
+  Es wird gezeigt, dass \\
 
 A short abstract in english.
 \end{abstract}
@@ -61,13 +69,14 @@ A short abstract in english.
 % Quellenverzeichnis setzen, welches im Inhaltsverzeichnis als Kapitel erscheinen soll. Der Titel soll 'Literaturverzeichnis' sein.
 \printbibliography[heading=bibintoc, title={Literaturverzeichnis}]
 
+
 % Einleitung
 \input{Einleitung}
 % Hauptteil
-\input{Konzept}
-\input{Komponenten}
-% \input{Clocking}
-% \input{Benchmark}
+\input{Konzept} % Gesamtkomponente beschreiben
+\input{Komponenten} % Einzelkomponenten beschreiben
+\input{Clocking}
+% \input{Benchmark} % Kommt das raus was man einstellt? Für jede Waveform Frequenzbereich abgehen, theorie praxis vergleich
 %Schluss
 % \input{Fazit}
 % \input{Ausblick}
