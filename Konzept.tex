@@ -1,18 +1,24 @@
-\chapter[Konzept]
+\chapter{Konzept}
 Im Folgenden sollen die verschiedenen Funktionsmerkmal des Funktionsgenerators erläutert werden. Anschließend wird sein Konzept anhand des grundlegenden Aufbaus des Funktionsgenerators erklärt.
  
-\section{Funktionsmerkmale}
+\section{Funktionsmerkmale} \label{Concept:Feature}
+In diesem Abschnitt soll geschildert werden, was der Generator kann und wie er sich konfigurieren lässt. 
 
-\subsection{Funktionen}
-der Generator kann auf vier verschiedene Funktionsbausteine zurückgreifen, die jeweils eine Funktion ausgeben:
+\subsection{Funktionen} \label{Concept:Feature:Func}
+Der Generator kann auf vier verschiedene Funktionsbausteine zurückgreifen, die jeweils einen anderen Spannungsverlauf ausgeben:
 
 \begin{enumerate}
-   \item \textbf{Konstante} \\ 
+   \item \textbf{Konstante Funktion} \\ 
     Die konstante analoge Spannung \analog{high} liegt am Ausgang an.
   \item \textbf{Rechteck-Funktion} \\
     Der Wert wechselt zwischen \analog{high} und \analog{low} in der Frequenz $f$.
     Der Anteil der Zykluszeit $T$, in dem der Ausgang auf \analog{high} ist, wird über den dutycycle eingestellt.
-    Mit dieser Funktion lassen sich so PWM-Signale erzeugen.
+    Die Dauer des \analog{high}-Pegels bzw. \analog{low}-Pegels, $T_{h}$ und $T_{l}$ berechnen sich folgendermaßen:
+    \begin{align}
+      T_{l} &= T \cdot \frac{dutycycle}{255}, dutycycle \in \{0, 1, ..., 255\} \\
+      T_{h} &= T - T_{l} 
+    \end{align}
+    Auf diese Art lassen sich PWM-Signale erzeugen.
   \item \textbf{Zick-Zack-Funktion} \\
     Der Analogwert steigt von \analog{low} bis \analog{high} linear an, erreicht er \analog{high}, fällt der Analogwert wieder kontinuierlich auf \analog{low} ab. Somit schwankt der Ausgangspegel mit der Frequenz $f$.
   \item \textbf{Rampen-Funktion} \\
@@ -27,13 +33,14 @@ der Generator kann auf vier verschiedene Funktionsbausteine zurückgreifen, die 
     ytick={0, 1.1, 2.2, 3.3},
     xmin=0, xmax=90,
     ymin=-0.2, ymax=3.5,
-    xticklabel={\pgfmathprintnumber{\tick}},
-    yticklabel={\pgfmathprintnumber{\tick}},
+    xlabel=$t$,
+    xticklabels={$0$, $T$, $2T$, $3T$,}, % \pgfmathprintnumber{\tick}},
+    yticklabels={, , ,},
     width=0.3\textwidth}
   % constant
   \subfloat[][konstante Funktion]{ 
     \begin{tikzpicture}
-      \begin{axis}
+      \begin{axis}[yticklabels={$h$, , ,$l$}, ylabel=$U(t)$]
         \addplot[color=blue] coordinates{(0, 1.75)(90, 1.75)};
       \end{axis}
     \end{tikzpicture}
@@ -66,12 +73,14 @@ der Generator kann auf vier verschiedene Funktionsbausteine zurückgreifen, die 
     \end{tikzpicture}
     \label{Concept:Plot:ramp}
   }
-  \caption{Funktionen} \label{Concept:Plot}
+  \caption{Funktionen, die der Funktionsgenerator ausgeben kann. Ihr Verlauf ist als Spannung $U(t)$ über der Zeit $t$ aufgetragen. Die Zykluszeit und \analog{high} bzw. \analog{low} sind durch  $T$, $h$ und $l$ gekennzeichnet.} \label{Concept:Plot}
 \end{figure}
 
 \subsection{Konfiguration}
-Der Funktionsgenerator muss, um 
-
+Der Funktionsgenerator muss, um extern konfiguriert werden zu können, über eine Möglichkeit für Nutzereingaben verfügen.
+Zu diesem Zweck wird die UART-Schnittstelle auf dem Basys3-Board genutzt.
+Über diese kann der Nutzer Konfigurationsbefehle per Computer versenden, die dann vom Generator interpretiert werden.
+Auch nutzerseitig wurde ein Python-Script geschrieben, mit dem die Kommunikation mit dem Generator vereinfacht wird.
 
 \section{Aufbau}
 Der Funktionsgenerator ist aus verschiedenen Einzelkomponenten zusammengesetzt.

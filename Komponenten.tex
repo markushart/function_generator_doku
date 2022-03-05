@@ -1,5 +1,8 @@
 \chapter{Komponenten}
 Nachdem im vorherigen Kapitel der grundlegende Aufbau des Funktionsgenerators erklärt wurde, sollen nun die einzelnen Komponenten aus denen der Funktionsgenerator aufgebaut ist genauer erläutert werden.
+Vorab muss noch erwähnt werden, dass jede Komponente über ein \bit{CLK} und ein \lowactive{CE} Signal verfügen.
+\lowactive{CE} ist der Chip-Enable Eingang. \bit{CLK} ist der Eingang für das Taktsignal.
+Alle Komponenten führen einen Arbeitsschritt aus, wenn an \lowactive{CE} \bit{low} anliegt und \bit{CLK} eine steigende Flanke detektiert.
 
 \section{Arithmetik}
 Der Funktionsgenerator braucht für die richtige Berechnung des Ergebnisses Komponenten, mit deren Hilfe mathematische Operationen ausgeführt werden können.
@@ -14,21 +17,21 @@ Die Komponente besitzt nämlich die Eingänge \bitvect{inc}, \bit{D} und \bitvec
 \begin{itemize}
 \item \bitvect{max\_ticks}: Bit-Vektor, der den maximalen Wert repräsentiert, ab dem der Zähler automatisch zurückgesetzt wird.
 Diese Funktion erleichtert es, die Zykluszeit einer Funktion $T_{func}$ als Zeitraum zwischen zwei Rücksetzungen festzulegen: $T_{func} = max_{ticks} \cdot T_{func}$
-\item \bit{D}: Richtung, in die der Zähler Zählen soll: 0 heißt aufwärts, 1 heißt abwärts
+\item \bit{D}: Richtung, in die der Zähler Zählen soll: \bit{low} heißt aufwärts, \bit{high} heißt abwärts
   \item \bitvect{inc}: Bit-Vektor, er repräsentiert das Inkrement, um das der Zähler hoch- bzw. runterzählen soll
 \end{itemize}
 
 Der maximale Zählstand ist durch die Anzahl der Stellen von \bitvect{o\_count} beschränkt. Sie kann generisch durch den Wert \code{data\_width} bestimmt werden. \\
 Würde es im nächsten Takt dazu kommen, dass der Zählstand größer als \bitvect{max\_ticks} wird (Überlauf), setzt er sich automatisch wieder auf Null zurück.
 Würde es im nächsten Takt dazu kommen, dass der Zählstand kleiner als Null wird (Unterlauf), wird der Zähler auf \bitvect{max\_ticks} zurückgesetzt.
-Zusätzlich kann der Zähler asynchron auf Null gesetzt werden, wenn der Eingang \lowactive{R} auf 0 gesetzt wird.
+Zusätzlich kann der Zähler asynchron auf Null gesetzt werden, wenn der Eingang \lowactive{R} auf \bit{low} gesetzt wird.
 
 
 \subsection{Teiler} \label{Comp:Arith:Division}
 Während beim Multiplizieren, Addieren und Subtrahieren auf Standardfunktionen
 zurückgegriffen wird, wird für die Division zweier Binärzahlen eine eigene
 Komponente entworfen. Die Gründe hierfür werden in \cref{Comp:Func:ZigZag}
-erläutert. \\ % Quelle: https://en.wikipedia.org/wiki/Division_algorithm
+erläutert. \\ 
 Diese Komponente kann die Division des Zählers $Z$ durch den Nenner $N$
 lösen, dabei sind $Z$ und $N$ zwei Binärzahlen mit gleicher
 Stellenanzahl und ohne Vorzeichen. Das Ergebnis ist der Quotient $Q$ und der Rest $R$. Der Algorithmus, den die Komponente ausführt, ist in Pseudocode in \cref{Comp:Arith:Division:Pseudo} beschrieben.
@@ -57,7 +60,7 @@ wenn N ungleich 0, dann
 Ende der bedingten Anweisung
 Ende des Algorithmus
 \end{verbatim}
-\caption{Pseudocode zur Beschreibung des Teilungsalgorithmus.} \label{Comp:Arith:Division:Pseudo}
+\caption{Pseudocode zur Beschreibung des Teilungsalgorithmus (vgl. \cite{wikipedia2022}).} \label{Comp:Arith:Division:Pseudo}
 \end{figure}
 
 \section{Takterzeugung}
@@ -109,7 +112,7 @@ Bei allen Funktionen ist diese auf zwölf eingestellt, da es sich beim DAC-Wandl
 \subsection{Konstante}   \label{Comp:Func:Const}
 Die konstante Funktion ist die einfachste der vier Funktionskomponenten.
 Sie gibt lediglich den an ihr anliegenden high-Wert auf ihrem Ausgang aus.
-Sie verfügt darüber hinaus noch über den Eingang \lowactive{CE}, der bewirkt, dass der Ausgang asynchron auf 0 gesetzt wird.
+Sie verfügt darüber hinaus noch über den Eingang \lowactive{CE}, der bewirkt, dass der Ausgang asynchron auf \bit{low} gesetzt wird.
 
 \subsection{Rechteck}   \label{Comp:Func:Square}
 Die Rechteckfunktion verfügt über einen Eingang \bitvect{thresh}, der mit dem Stand des internen Zählers verglichen wird.
@@ -154,10 +157,8 @@ ein Paritätsbit folgen. Da es zwischen dem Sender und Empfänger kein synchrone
 Taktsignal gibt, ist es wichtig, dass ihre Sende- und Empfangsfrequenz gleich
 ist. Diese Frequenz ist die sogenannte Baudrate. Im Funktionsgenerator ist sie
 auf 115200 Bits / s festgelegt. \\
-Die im Generator verwendete Schnittstelle wurde,
-um den Arbeitsaufwand zu verringern, aus einer Vorlage übernommen (Quelle). Sie
-beinhaltet sowohl eine Empfänger- als auch eine Sender-Komponente. Es gibt
-folgende Eingangssignale:
+Die im Generator verwendete Schnittstelle wurde, um den Arbeitsaufwand zu verringern, aus einer Vorlage übernommen (vgl. \cite{digilent2020}).
+Sie beinhaltet sowohl eine Empfänger- als auch eine Sender-Komponente. Es gibt folgende Eingangssignale:
 \begin{itemize}
 \item \lowactive{reset}: Eingang, die Schnittstelle wird auf den Initialisierungszustand zurückgesetzt und die aktuelle Übertragung bzw. aktuelle Empfangsprozesse werden abgebrochen.
 
@@ -195,9 +196,9 @@ Dabei ist darauf zu achten, dass für das Argument nur der Wert der Bits Null bi
 \end{table}
 
 \section{DAC-Konverter} \label{Comp:DAC}
-Um den digital berechneten Ausgangswert in ein analoges Signal umzuwandeln, braucht es eine Komponente, die auf dem Basys3-Board noch nicht vorhanden ist.
+Um den digital berechneten Ausgangswert in ein analoges Signal umzuwandeln, braucht es eine Komponente, die auf dem Basys 3 Board noch nicht vorhanden ist.
 Hier kommt der digital zu analog Wandler PmodDA2 der Firma Digilent zum Einsatz.
-Dieser DAC verfügt über zwei DAC121S101-ICs von Texas Instruments die als jeweils ein Kanal die seriell empfangenen zwölf Bit Werte in eine analoge Spannung umwandeln (vgl. Datenblatt).
+Dieser DAC verfügt über zwei DAC121S101-ICs von Texas Instruments die als jeweils ein Kanal die seriell empfangenen zwölf Bit Werte in eine analoge Spannung umwandeln (vgl. \cite{DAC121S101}, \cite{pmodDA2manual}).
 Von diesen Kanälen sind zwei im Funktionsgenerator implementiert, es soll aber zunächst nur einer zum Einsatz kommen.
 Der Chip verfügt über ein Kommunikationsprotokoll ähnlich dem SPI-Protokoll.
 Es gibt ein \lowactive{SYNC} Signal, vergleichbar mit dem \lowactive{SS} Signal von SPI, ein \bit{CLK} Signal und zwei Datenleitungen \bitvect{DINA} und \bitvect{DINB} für Kanal Eins und Zwei.
@@ -219,6 +220,24 @@ Das Senden ist dann erfolgreich, wenn das \lowactive{SYNC} Signal 16 DAC-Takte l
 
   \end{tikztimingtable}
   \caption{Signalverlauf bei der Übertragung des Werts 0x123 an den Kanal A des DACs} \label{Comp:DAC:Channel:Protocoll}
+\end{figure}
+
+\section{Clocking}
+
+
+\begin{figure} \centering
+  \begin{tikzpicture} 
+    \node {CLK100MHZ}[grow=east, sibling distance=2cm, level distance=5cm]
+    child {node {CLK\_DAC}
+      child {node {CLK\_CONVERSION}
+        edge from parent node [right] {$\frac{1}{16}$}}
+      edge from parent node [right] {$\frac{1}{4}$}}
+    child {node {CLK\_FUNC}
+      edge from parent node [right] {$\frac{1}{64}$}}
+    child {node {CLK\_UART}
+      edge from parent node [right] {$\frac{1}{868}$}};
+  \end{tikzpicture} 
+  \caption{Clock-Tree} \label{Comp:clk:clocktree}
 \end{figure}
 
 

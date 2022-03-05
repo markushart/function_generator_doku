@@ -6,7 +6,8 @@
 % Erweiterungen einbinden
 \usepackage[utf8]{inputenc}
 \usepackage{babel}
-\usepackage{biblatex}
+\usepackage[backend=biber]{biblatex}
+\usepackage{amsmath}
 \usepackage{cleveref}
 \usepackage[multiple]{footmisc}
 \usepackage{graphicx}
@@ -40,14 +41,15 @@
 % Attribute für die Titelseite
 \titlehead{\hfill\includegraphics[width=4cm]{logo.png}} % Das FH-Logo
 \subject{Fachhochschule Bielefeld\\Fachbereich Ingenieurwissenschaften und Mathematik\\Studiengang Ingenieurinformatik}
-\title{Titel der Ausarbeitung}
+\title{Implementierung eines VHDL-basierten, digitalen Funktionsgenerators auf dem Basys3-Board}
 \subtitle{Art der Ausarbeitung}
-\author{Name der/s Autors/in bzw. Autoren/innen inkl. Matrikelnummer}
+\author{Markus Hartlage 1103528}
 \date{\today} % Das Datum der Abgabe
-\publishers{Betreuer:\\ Prof. Dr. Axel Schneider\\Dr. Hanno Gerd Meyer}
+\publishers{Betreuer:\\ Prof. Dr. Axel Schneider\\Dr. Hanno Gerd Meyer\\Kevin Hunke}
 
 % Pfad zur bib-Datei mit Literaturquellen
 \bibliography{references.bib}
+\addbibresource{references.bib}
 
 % --- Dokumentenrumpf ---
 \begin{document}
@@ -75,10 +77,9 @@ A short abstract in english.
 % Hauptteil
 \input{Konzept} % Gesamtkomponente beschreiben
 \input{Komponenten} % Einzelkomponenten beschreiben
-\input{Clocking}
-% \input{Benchmark} % Kommt das raus was man einstellt? Für jede Waveform Frequenzbereich abgehen, theorie praxis vergleich
+\input{Funktionstest} % Kommt das raus was man einstellt? Für jede Waveform Frequenzbereich abgehen, theorie praxis vergleich
 %Schluss
-% \input{Fazit}
-% \input{Ausblick}
+\input{Fazit}
+\input{Ausblick}
 
 \end{document}
