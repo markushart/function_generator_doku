@@ -4,10 +4,71 @@ Dazu werden zunächst die theoretischen Grenzen der Konfiguration getestet und d
 Besonders interessant ist hierbei, in welchem Frequenzbereich der Generator zuverlässig funktioniert.
 
 \section{theoretische Limitierungen}
+Um den praktischen Nutzen des Funktionsgenerators einzuschätzen, werden die Grenzen der einstellbaren Frequenz, die Auflösung und der Spannungsbereich berechnet.
+Für die Spannung ergeben sich diese Werte aus dem Datenblatt des eingesetzten DACs, dieser kann in einem Bereich von 0 bis 5V eingesetzt werden \cite{PmodDA2}.
+Für den Betrieb auf dem Basys 3 Board läuft der Spannungsbereich von 0 bis 3,3 V, da hier die Ausgangsspannung des Boards der limitierende Faktor ist.
+Nachfolgend werden noch der Frequenzbereich und die Auflösung bestimmt.
 
 \subsection{Frequenzbereich}
+Der Systemtakt $f_{sys}$ des Generators beträgt 100 MHz.
+Der Frequenzbereich der Funktionen, die er ausgeben kann, reicht von ca. 0,0931 Hz bis zu ca. 781 kHz.
+Die Frequenz $f_{count}$ ist die Frequenz mit der der interne Zähler der Funktionsbausteine hochzählt und beträgt ein 64tel des Systemtakts $f_{sys}$ (siehe \cref{test:theo:freq:fcount}).
+Die minimale Frequenz $f_{min}$ errechnet sich aus dem maximalen Zählstand, der wiederum abhängig ist von seiner Bitbreite \code{clk\_width} (siehe \cref{test:theo:freq:fmin}).
+Die maximale Frequenz ergibt sich aus dem Shannon'schen Abtasttheorem, nach dem die minimale Abtastfrequenz eines Signals doppelt so groß sein muss, wie die Frequenz des abgetasteten Signals \cite(blabla).
+In diesem Fall entspricht die Abtastfrequenz $f_{count}$ und das abgetastete Signal dem Ausgangssignal, woraus folgt, dass das ausgehende Signal nur halb so groß sein kann, wie $f_{count}$ (siehe \cref{test:theo:freq:fmin}).
+
+\begin{align}
+  f_{count} &= \frac{f_{sys}}{64} \label{test:theo:freq:fcount}\\  
+  f_{max} &= \frac{f_{count}}{2}  \label{test:theo:freq:fmax}\\ 
+  f_{min} &= \frac{f_{count}}{2^{clk\_width} - 1} \label{test:theo:freq:fmin}
+\end{align}
 
 \subsection{Auflösung}
+Die Auflösung des analogen Ausgangssignals hängt sowohl von der Geschwindigkeit ab, mit der das digitale Signal analogisiert werden kann, als auch von der maximalen Anzahl digital darstellbarer Werte.
+Überschreitet die Frequenz des analogen Signals $f$ die Grenzfrequenz $f_{grenz}$, so fällt die Auflösung $R$ reziprok zu $f$ ab (siehe \cref{test:theo:res:plot}).
+Oberhalb von $f_{grenz}$ ist die Auflösung durch die Bitbreite des ADCs begrenzt.
+Da es sich um einen 12-Bit Wandler handelt, beträgt die Anzahl darstellbarer Werte und damit auch die höchste Auflösung $2^{12} = 4096$.
+Diesen Wert nimmt die Auflösung an, wenn die Frequenz kleiner als $f_{grenz}$ ist (siehe \cref{test:theo:freq:fgrenz}).
+
+\begin{align}
+  R &= \begin{cases}
+    4095               & f \leq f_{grenz}                      \\
+    \frac{f_{count}}{f} & f > f_{grenz} = \frac{f_{count}}{4095}
+        \end{cases} \label{test:theo:freq:fgrenz}
+\end{align}
+
+Konkret bedeutet dass für den Funktionsgenerator, dass bei einer Amplitude von $U_{SS}=3,3V$ und einer Frequenz von $f=100kHz$, die Auflösung $4,54V^{-1}$ statt der maximalen Auflösung von $1241V^{-1}$ beträgt, das heißt, dass bei 100kHz 4,54 Werte statt 1241 Werte pro Volt gesampelt werden.
+
+\begin{figure}[h] \centering
+    \begin{tikzpicture}
+      \begin{loglogaxis}
+        [xlabel=$f\:in\:Hz$,
+        ylabel=$R(f)$,
+        ymin=1,
+        ymax=10000,,
+        width=\textwidth,
+        height=0.5\textwidth,
+        grid=major]
+        \addplot[color=black, domain=0.09313:381.56] {4095};
+        \addplot[color=black, domain=381.56:781250] {100000000 / (64*\x)};
+        % help lines and nodes:
+        \addplot[color=red] coordinates{(381.56, 1)(381.56, 10000)};
+        \node[label={[rotate=90]above:$f_{grenz}$}] at (381.56, 100);
+        \node at (381.56, 4095) {\textbullet};
+
+        \addplot[color=red] coordinates{(0.09313, 1)(0.09313, 10000)};
+        \node[label={[rotate=90]above:$f_{min}$}] at (0.09313, 100);
+        \node at (0.09313, 4095) {\textbullet};
+
+        \addplot[color=red] coordinates{(781250, 1)(781250, 10000)};
+        \node[label={[rotate=90]above:$f_{max}$}] at (781250, 100);
+        \node at (781250, 2) {\textbullet};
+      \end{axis}
+    \end{tikzpicture}
+ \caption{Doppelt logarithmisches Diagramm der Auflösung $R(f)$ über den Frequenzbereich $f$. Die Auflösung bleibt konstant bei 4095 1/tick bis sie schließlich bei $f_{grenz}$ anfängt zu sinken.} \label{test:theo:res:plot}
+\end{figure}
 
 \section{reales Verhalten}
+Nun soll das reale Verhalten des Funktionsgenerators untersucht werden.
+Dazu wird das digitale Oszilloskop Analog Discovery 2 von digilent benutzt.
 

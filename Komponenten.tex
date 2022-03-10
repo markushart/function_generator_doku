@@ -198,7 +198,7 @@ Dabei ist darauf zu achten, dass für das Argument nur der Wert der Bits Null bi
 \section{DAC-Konverter} \label{Comp:DAC}
 Um den digital berechneten Ausgangswert in ein analoges Signal umzuwandeln, braucht es eine Komponente, die auf dem Basys 3 Board noch nicht vorhanden ist.
 Hier kommt der digital zu analog Wandler PmodDA2 der Firma Digilent zum Einsatz.
-Dieser DAC verfügt über zwei DAC121S101-ICs von Texas Instruments die als jeweils ein Kanal die seriell empfangenen zwölf Bit Werte in eine analoge Spannung umwandeln (vgl. \cite{DAC121S101}, \cite{pmodDA2manual}).
+Dieser DAC verfügt über zwei DAC121S101-ICs von Texas Instruments die als jeweils ein Kanal die seriell empfangenen zwölf Bit Werte in eine analoge Spannung umwandeln (vgl. \cite{DAC121S101}, \cite{PmodDA2}).
 Von diesen Kanälen sind zwei im Funktionsgenerator implementiert, es soll aber zunächst nur einer zum Einsatz kommen.
 Der Chip verfügt über ein Kommunikationsprotokoll ähnlich dem SPI-Protokoll.
 Es gibt ein \lowactive{SYNC} Signal, vergleichbar mit dem \lowactive{SS} Signal von SPI, ein \bit{CLK} Signal und zwei Datenleitungen \bitvect{DINA} und \bitvect{DINB} für Kanal Eins und Zwei.
@@ -223,21 +223,44 @@ Das Senden ist dann erfolgreich, wenn das \lowactive{SYNC} Signal 16 DAC-Takte l
 \end{figure}
 
 \section{Clocking}
+Wichtig für den richtigen Ablauf ist die Taktung der Komponenten untereinander.
+Dazu dienen die \lowactive{CE} und \bit{CLK} Eingänge der einzelnen Komponenten.
+Die Komponente Clock-Enable oder andere interne Prozesse schalten das \lowactive{CE} Signal in dem erforderlichen Takt ein bzw. aus.
+Durch das Hintereinanderschalten der Komponenten ergibt sich ein Baum aus von einander abhängigen Takten.
+Beispielsweise ist die Frequenz der Funktionskomponenten von der Frequenz des DAC-Konverters abhängig.
+Der sogenannte Clock-Tree des Generators ist ein \cref{Comp:clk:clocktree} abgebildet.
+Vom Taktsignal des Systemtakts \bit{CLK100MHZ} leiten sich folgende Signale ab:
+\begin{itemize}
+\item \bit{CLK\_UARTx16}: Dieses Taktsignal besitzt mit $115200 \frac{Bit}{s} \cdot 16 = 1,84 \frac{MBit}{s}$ die 16 Fache Frequenz der Baudrate, dies entspricht einem 54tel des Systemtakts.
+  Es dient dazu, das eingehende Signal so fein abzutasten, dass rechtzeitig auf eine Änderung in der \bit{RX}-Leitung reagiert werden kann.
+    \begin{itemize}
+      \item \bit{CLK\_UART}: Dies ist der Takt, mit dem Bits über die UART-Schnittstelle versendet und empfangen werden.
+      Mit $115200 \frac{Bit}{s}$ entspricht er einem 16tel des \bit{CLK\_UARTx16} Takts.
+    \end{itemize}
+  \item \bit{CLK\_DAC}: Der Takt des DAC-Konverters ist laut Datenblatt auf maximal 30MHz beschränkt \cite{DAC121S101}.
+    Da eine ganzzahlige Teilung des Systemtakts erforderlich ist, ist die maximale Frequenz, mit der der DAC am Basys 3 Board betrieben werden kann $\frac{f_{sys}}{4} = \frac{100MHz}{4} = 25MHz$.
+    \begin{itemize}
+    \item \bit{CLK\_CONVERSION}: Eine Konvertierung von digital zu analog dauert 16 Takte, wie bereits in \cref{Comp:DAC:Channel} beschrieben wurde.
+      Damit beträgt der Takt, mit dem Konvertierungen erfolgen, ein 16tel des \bit{CLK\_DAC} Takts betragen.
+    \item \bit{CLK\_FUNCCOUNT}: Der interne Takt der Zähler in den Funktionsbausteinen läuft im selben Takt wie \bit{CLK\_CONVERSION}, sodass ein neuer Ausgangswert aus dem Zählstand errechnet und dieser dann konvertiert werden kann.
+    \end{itemize}
+\end{itemize}
 
-
-\begin{figure} \centering
+\begin{figure}[h] \centering
   \begin{tikzpicture} 
     \node {CLK100MHZ}[grow=east, sibling distance=2cm, level distance=5cm]
     child {node {CLK\_DAC}
       child {node {CLK\_CONVERSION}
-        edge from parent node [right] {$\frac{1}{16}$}}
-      edge from parent node [right] {$\frac{1}{4}$}}
-    child {node {CLK\_FUNC}
-      edge from parent node [right] {$\frac{1}{64}$}}
-    child {node {CLK\_UART}
-      edge from parent node [right] {$\frac{1}{868}$}};
+        edge from parent node [below] {$\frac{1}{16}$}}
+      child {node {CLK\_FUNC}
+        edge from parent node [above] {$\frac{1}{16}$}}
+      edge from parent node [below] {$\frac{1}{4}$}}
+    child {node {CLK\_UARTx16}
+      child {node {CLK\_UART}
+        edge from parent node [above] {$\frac{1}{54}$}}
+      edge from parent node [above] {$\frac{1}{16}$}};
   \end{tikzpicture} 
-  \caption{Clock-Tree} \label{Comp:clk:clocktree}
+  \caption{Clock-Tree des Funktionsgenerators. } \label{Comp:clk:clocktree}
 \end{figure}
 
 

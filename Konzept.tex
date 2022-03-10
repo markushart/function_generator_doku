@@ -33,10 +33,10 @@ Der Generator kann auf vier verschiedene Funktionsbausteine zurückgreifen, die 
     ytick={0, 1.1, 2.2, 3.3},
     xmin=0, xmax=90,
     ymin=-0.2, ymax=3.5,
-    xlabel=$t$,
+    % xlabel=$t$,
     xticklabels={$0$, $T$, $2T$, $3T$,}, % \pgfmathprintnumber{\tick}},
     yticklabels={, , ,},
-    width=0.3\textwidth}
+    width=0.4\textwidth}
   % constant
   \subfloat[][konstante Funktion]{ 
     \begin{tikzpicture}
@@ -55,10 +55,11 @@ Der Generator kann auf vier verschiedene Funktionsbausteine zurückgreifen, die 
     \end{tikzpicture}
     \label{Concept:Plot:square}
   } 
+
   % zigzag \foreach \x in {0, 15, ..., 90} {(\x, 3.3)}
   \subfloat[][Zick-Zack-Funktion]{
     \begin{tikzpicture}
-      \begin{axis}
+      \begin{axis}[ylabel=$U(t)$, xlabel=$t$]
         \addplot[color=blue] coordinates{(0, 0)(15, 3.3)(30, 0)(45, 3.3)(60, 0)(75, 3.3)(90, 0)};
       \end{axis}
     \end{tikzpicture}
@@ -67,7 +68,7 @@ Der Generator kann auf vier verschiedene Funktionsbausteine zurückgreifen, die 
   % ramp
   \subfloat[][Rampenfunktion]{
     \begin{tikzpicture}
-      \begin{axis}
+      \begin{axis}[xlabel=$t$]
         \addplot[color=blue, domain=0:90]  coordinates{(0, 0)(30, 3.3)(30, 0)(60, 3.3)(60, 0)(90, 3.3)(90, 0)};
       \end{axis}
     \end{tikzpicture}
@@ -89,8 +90,8 @@ Hier kann man gut erkennen, dass die verschiedenen Funktionen parallel arbeiten 
 Das Signal \bitvect{waveform} steuert den Multiplexer, der die Ausgabesignale \bitvect{y\_out} an den DAC-Wandler weitergibt.
 Dieser erzeugt daraus wiederum ein analoges Signal, dass dann am Ausgang anliegt.
 
-\begin{figure}[h]
+\begin{sidewaysfigure}[h]
   \includegraphics[width=\textwidth]{function_generator}
   \caption{Diagramm des Funktionsgenerators, zusammengesetzt aus seinen Einzelkomponenten. Aus Gründen der Übersichtlichkeit sind die \bit{CLK} Signale und \lowactive{CE} Signale nicht angeschlossen dargestellt. Alle \bit{CLK} Signale sind an den Systemtakt angeschlossen und alle \lowactive{CE} Signale liegen auf Masse.}  \label{Concept:FuncGenDia}
-\end{figure}
+\end{sidewaysfigure}
 
