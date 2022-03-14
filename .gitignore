@@ -1,6 +1,7 @@
 auto/
 output/
 svg-inkscape/
+test/
 
 !main.tex
 !main.pdf
@@ -8,3 +9,4 @@ svg-inkscape/
 
 imgs/.ipynb_checkpoints/
 *.ipynb
+*.#*

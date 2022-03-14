@@ -201,17 +201,22 @@ Hier kommt der digital zu analog Wandler PmodDA2 der Firma Digilent zum Einsatz.
 Dieser DAC verfügt über zwei DAC121S101-ICs von Texas Instruments die als jeweils ein Kanal die seriell empfangenen zwölf Bit Werte in eine analoge Spannung umwandeln (vgl. \cite{DAC121S101}, \cite{PmodDA2}).
 Von diesen Kanälen sind zwei im Funktionsgenerator implementiert, es soll aber zunächst nur einer zum Einsatz kommen.
 Der Chip verfügt über ein Kommunikationsprotokoll ähnlich dem SPI-Protokoll.
-Es gibt ein \lowactive{SYNC} Signal, vergleichbar mit dem \lowactive{SS} Signal von SPI, ein \bit{CLK} Signal und zwei Datenleitungen \bitvect{DINA} und \bitvect{DINB} für Kanal Eins und Zwei.
+Es gibt ein \lowactive{SYNC} Signal, vergleichbar mit dem \lowactive{SS} Signal von SPI, ein \bit{CLK} Signal und zwei Datenleitungen \bit{DINA} und \bit{DINB} für Kanal Eins und Zwei.
+\lowactive{SYNC} und \bit{CLK} werden vom DAC-Konverter für beide Kanäle gemanaged.
+\lowactive{SYNC} wird auf \bit{low} gesetzt, wenn sich der Eingangswert eines Kanals (\bitvect{DATA\_in\_A}, \bitvect{DATA\_in\_B}) ändert.
+Dann werden 16 Takte abgezählt und \lowactive{SYNC} wird wieder auf \bit{high} gesetzt.
+Nachdem \lowactive{SYNC} für einen Taktzyklus \bit{high} war, kann die nächste Konvertierung erfolgen.
+So ergeben sich in Summe 17 Takte pro Wandlung.
 
 \subsection{DAC-Kanal} \label{Comp:DAC:Channel}
 Ein einzelner Kanal kümmert sich um die Serialisierung des anliegenden zwölf Bit Werts \bitvect{DATA\_in}.
 Ergänzend zu den zwölf Datenbits können dem gesendeten Wort noch zwei Bit für Zusatzfunktionen des Wandlers mitgeschickt werden.
 Für diese Implementation werden sie allerdings auf \bitvect{low} gehalten, so dass der DAC im Normalbetrieb läuft.
 Zusätzlich werden die ersten beiden gesendeten Bits ignoriert, innerhalb einer Übertragung werden also 16 Bit geschickt.
-Das Senden ist dann erfolgreich, wenn das \lowactive{SYNC} Signal 16 DAC-Takte lang auf \bitvect{low} gehalten wurde. Sodann liegt am analogen Ausgang die entsprechende Spannung an.
+Die Konvertierung auf dem Pmod-Chip startet dann, wenn er 16 fallende \bit{CLK} Flanken gezählt hat, während das \lowactive{SYNC} Signal auf \bit{low} gehalten wurde \cite{DAC121S101}.
+Sodann liegt am analogen Ausgang die entsprechende Spannung an.
 
-\begin{figure}
-  \centering
+\begin{figure} \centering
   \begin{tikztimingtable} 
     CLK                      & 34{C}                        \\
     $\overline{\mbox{SYNC}}$ & H 32L H                      \\
@@ -225,7 +230,7 @@ Das Senden ist dann erfolgreich, wenn das \lowactive{SYNC} Signal 16 DAC-Takte l
 \section{Clocking}
 Wichtig für den richtigen Ablauf ist die Taktung der Komponenten untereinander.
 Dazu dienen die \lowactive{CE} und \bit{CLK} Eingänge der einzelnen Komponenten.
-Die Komponente Clock-Enable oder andere interne Prozesse schalten das \lowactive{CE} Signal in dem erforderlichen Takt ein bzw. aus.
+Die Komponente Clock-Enable oder andere interne Prozesse schalten die \lowactive{CE} Signale in dem erforderlichen Takt ein bzw. aus.
 Durch das Hintereinanderschalten der Komponenten ergibt sich ein Baum aus von einander abhängigen Takten.
 Beispielsweise ist die Frequenz der Funktionskomponenten von der Frequenz des DAC-Konverters abhängig.
 Der sogenannte Clock-Tree des Generators ist ein \cref{Comp:clk:clocktree} abgebildet.
@@ -240,8 +245,8 @@ Vom Taktsignal des Systemtakts \bit{CLK100MHZ} leiten sich folgende Signale ab:
   \item \bit{CLK\_DAC}: Der Takt des DAC-Konverters ist laut Datenblatt auf maximal 30MHz beschränkt \cite{DAC121S101}.
     Da eine ganzzahlige Teilung des Systemtakts erforderlich ist, ist die maximale Frequenz, mit der der DAC am Basys 3 Board betrieben werden kann $\frac{f_{sys}}{4} = \frac{100MHz}{4} = 25MHz$.
     \begin{itemize}
-    \item \bit{CLK\_CONVERSION}: Eine Konvertierung von digital zu analog dauert 16 Takte, wie bereits in \cref{Comp:DAC:Channel} beschrieben wurde.
-      Damit beträgt der Takt, mit dem Konvertierungen erfolgen, ein 16tel des \bit{CLK\_DAC} Takts betragen.
+    \item \bit{CLK\_CONVERSION}: Eine Konvertierung von digital zu analog dauert 17 Takte, wie bereits in \cref{Comp:DAC:Channel} beschrieben wurde.
+      Damit beträgt der Takt, mit dem Konvertierungen erfolgen, ein 17tel des \bit{CLK\_DAC} Takts betragen.
     \item \bit{CLK\_FUNCCOUNT}: Der interne Takt der Zähler in den Funktionsbausteinen läuft im selben Takt wie \bit{CLK\_CONVERSION}, sodass ein neuer Ausgangswert aus dem Zählstand errechnet und dieser dann konvertiert werden kann.
     \end{itemize}
 \end{itemize}
@@ -251,9 +256,9 @@ Vom Taktsignal des Systemtakts \bit{CLK100MHZ} leiten sich folgende Signale ab:
     \node {CLK100MHZ}[grow=east, sibling distance=2cm, level distance=5cm]
     child {node {CLK\_DAC}
       child {node {CLK\_CONVERSION}
-        edge from parent node [below] {$\frac{1}{16}$}}
+        edge from parent node [below] {$\frac{1}{17}$}}
       child {node {CLK\_FUNC}
-        edge from parent node [above] {$\frac{1}{16}$}}
+        edge from parent node [above] {$\frac{1}{17}$}}
       edge from parent node [below] {$\frac{1}{4}$}}
     child {node {CLK\_UARTx16}
       child {node {CLK\_UART}
@@ -262,5 +267,4 @@ Vom Taktsignal des Systemtakts \bit{CLK100MHZ} leiten sich folgende Signale ab:
   \end{tikzpicture} 
   \caption{Clock-Tree des Funktionsgenerators. } \label{Comp:clk:clocktree}
 \end{figure}
-
 
