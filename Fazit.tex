@@ -1,6 +1,17 @@
 \chapter{Fazit}
 Es wurde erfolgreich ein digitaler Funktionsgenerator auf dem Basys 3 Board implementiert.
-Dieser kann drei verschiedene Funktionen ausgeben und über eine UART Schnittstelle konfiguriert werden.
+Dieser kann vier verschiedene Funktionen ausgeben und über eine UART Schnittstelle konfiguriert werden. \\
 Das dem Generator zugrundeliegende Konzept und das Zusammenspiel der Einzelkomponenten wurde erläutert.
-Darüber hinaus konnte seine Funktionstüchtigkeit in dem Frequenzbereich ... bewiesen werden.
-Außerdem wurde gezeigt, dass die Konfiguration per UART-Interface gelingt.
+Auch das interne Clock-Management wurde geschildert. \\
+Die theoretischen Grenzen der Auflösung und der Frequenz wurden aufgezeigt. 
+Darüber hinaus konnte seine Funktionstüchtigkeit in dem Frequenzbereich 0,1 Hz bis 10 kHz bewiesen werden.
+Alle Frequenzen unterhalb von $f_{min}$ führen zu einer höheren Ausgangsfrequenz als der gewünschten.
+Zwischen 10 kHz und $f_{max}$ wird das Ausgangssignal unsauber und oberhalb von $f_{max}$ ist eine zuverlässige Ausgabe nicht mehr möglich.
+Warum das Signal oberhalb von 10 kHz derart ungenau wird, konnte teilweise erklärt werden.
+Hier sollten jedoch weitere Untersuchungen angestrebt werden, um die Fehlerursache vollständig zu klären.\\
+Die Ausgangsspannung entspricht nicht ganz der eingestellten Spannung.
+Eine bessere Referenzspannung könnte aber für einen saubereren Ausgangspegel sorgen.
+Allerdings wurde die Korrektheit des Ausgangspegels bis jetzt nur für die Spannung 0 und 3,3 V untersucht.
+Um ein vollständigeres Bild der Genauigkeit zu bekommen, sind weitere Nachforschungen nötig.\\
+Es wurde gezeigt, dass die Konfiguration per UART-Interface funktioniert.
+Außerdem wurde dokumentiert, wie der Funktionsgenerator konfiguriert werden kann.

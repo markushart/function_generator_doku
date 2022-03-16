@@ -8,6 +8,11 @@
 \usepackage{babel}
 \usepackage[backend=biber]{biblatex}
 \usepackage{amsmath}
+% für hyperlinks:
+\usepackage{hyperref}
+\hypersetup{
+  hidelinks,
+  colorlinks=false}
 \usepackage{cleveref}
 \usepackage[multiple]{footmisc}
 \usepackage{graphicx}
@@ -63,12 +68,28 @@
   In dieser Studienarbeit wird die Implementation eines Funktionsgenerators mithilfe der Hardwarebeschreibungssprache VHDL geschildert.
   Der Aufbau des Generators wird erläutert sowie seine korrekte Funktion überprüft.
   Darüber hinaus werden seine Leistungsdaten erfasst und dargelegt.
-  Es wird gezeigt, dass der Generator zuverlässig in einem Frequenzbereich von 0.09Hz bis ... und einem Spannungsbereich von 0 bis 3,3V funktioniert. Außerdem gelingt die Konfiguration per UART-Schnittstelle.\\
+  Es wird gezeigt, dass der Generator zuverlässig in einem Frequenzbereich von 0,1 Hz bis 10 kHz und einem Spannungsbereich von 0 bis 3,2 V funktioniert.
+  Über 10 kHz hinaus weist er Abweichungen zwischen gewünschtem und tatsächlichem Funktionsverlauf auf.
+  Abweichungen treten in diesem Frequenzbereich auch zwischen der Soll- und Ist-Frequenz auf.
+  Diese können nur teilweise erklärt werden, weshalb weitere Untersuchungen nötig sind, um den Frequenzbereich des Generators ganz ausschöpfen zu können. \\
+  Außerdem wurde die UART-Schnittstelle getestet, mit der der Generator konfiguriert werden kann.
+  Dieser Test verlief erfolgreich. Die Befehle zur Konfiguration und ihre Funktion werden ebenfalls dokumentiert. \\
+  Sämtlicher Quellcode findet sich in einem GitHub-Repository unter folgender URL: \\
+  \href{https://github.com/markushart/studienarbeit_function_generator.git}{\code{https://github.com/markushart/studienarbeit\_function\_generator.git}}
+  \\
 
-  This student research project describes the implementation of a function generator using the hardware description language VHDL.
-  The structure of the generator is explained and its correct function is checked.
+  This student research project documents the implementation of a function generator using the hardware description language VHDL.
+  The composition of the generator is explained and its correct function is checked.
   In addition, its performance data is recorded and presented.
-  It is shown that the generator works reliably in a frequency range from 0.09Hz to ..., when working on Voltage between 0 and 3,3V. Furthermore, the configuration via UART interface is tested successfully.
+  It is shown that the generator operates reliably in a frequency range of 0,1 Hz to 10 kHz and a voltage range of 0 to 3,2 V.
+  Beyond 10 kHz, it exhibits deviations between desired and actual operation.
+  Deviations also occur between the desired and actual frequencies in this frequency range.
+  These can only be explained partly, so further research is necessary to exhaust the full possible frequency range. \\
+  In addition, the UART interface was tested, which can be used to configure the generator.
+  This test was successful. The commands for configuration and their function are also documented. \\
+  All source code can be found in a GitHub repository at the following URL: \\
+  \href{https://github.com/markushart/studienarbeit_function_generator.git}{\code{https://github.com/markushart/studienarbeit\_function\_generator.git}}
+  \\
 
 \end{abstract}
 

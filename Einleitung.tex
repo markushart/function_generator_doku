@@ -1,18 +1,25 @@
-\chapter[Einleitung]{Einleitung\raisebox{.3\baselineskip}{\normalsize \footnotemark}}
+\chapter[Einleitung]{Einleitung}
 
 Diese Studienarbeit behandelt die Konzipierung und Implementierung eines
 digitalen Funktionsgenerators in der Hardwarebeschreibungssprache VHDL.
 Ein Funktionsgenerator ist ein elektronisches Bauteil, das in der Lage ist,
 verschiedene Spannungsverläufe an seinem Ausgang auszugeben. Diese
 Spannungsverläufe entsprechen einer mathematischen Funtkion. Z. B. kann ein
-Funktionsgenerator genutzt werden, um ein Rechteck-Signal mit einer bestimmten
-Frequenz auszugeben, dass dann als Auslöser für eine Kamera fungiert, sodass die Kamera Bilder in einem bestimmten zeitlichen Abstand aufnimmt.
-Im Normalfall würde ein Funtkionsgenerator als Digitalschaltung in einen Chip
-integriert oder auf eine Platine gelötet werden. Einen anderen Ansatz zum Bau
-von digitalen Schaltungen bieten ``Free Programmable Gate Arrays'', kurz FPGA.
+Funktionsgenerator genutzt werden, um ein Rechteck- oder Sinussignal auszugeben.
+Der praktische Nutzen könnte dann die Aktivierung eines Kameraauslösers in einer bestimmten Frequenz oder die Helligkeitssteuerung einer LED sein. \\
+Ein Funtkionsgenerator kann als Digitalschaltung in einen Chip integriert oder auf eine Platine gelötet werden, er könnte aber auch als Programm eines Universalrechners laufen.
+Softwarelösungen sind verfügen nicht über das hohe Maß an Effizienz und Geschwindigkeit einer integrierten Schaltung.
+Diese wiederum sind nur in großer Stückzahl rentabel herstellbar und von Hand gelötete Schaltungen lassen sich nicht einfach reproduzieren und sind nicht so kompakt.
+Einen Mittelweg zwischen diesen Zielkonflikten bieten sogenannte ``\textbf{F}ree \textbf{P}rogrammable \textbf{G}ate \textbf{A}rrays'', kurz FPGA.
 Auf diesen ICs befinden sich verschiedene Bausteine die durch Anlegen einer
 Programmierspannung miteinander verknüpft werden können. Somit ist es möglich,
-verschiedenste Schaltungen auf demselben IC zu verwirklichen.
+verschiedenste Schaltungen auf demselben IC zu verwirklichen.\\
 Die Schaltungen können mithilfe einer Beschreibungssprache designed werden.
-Eine dieser Sprachen ist VHDL (``\textbf{V}ery \textbf{H}ighspeed Hardware \textbf{D}escription \textbf{L}anguage''), welche in dieser Studienarbeit verwendet werden soll. 
-
+Eine dieser Sprachen ist VHDL (``\textbf{V}ery \textbf{H}ighspeed Hardware \textbf{D}escription \textbf{L}anguage''), welche in dieser Studienarbeit verwendet werden soll. \\
+Bei dem in diesem Projekt verwendeten FPGA handelt es sich um den Artix 7 von Xilinx.
+Dieser ist in das Entwicklungsboard Basys 3 des Herstellers digilent eingebettet \cite{digilent2016}.
+Es verfügt über diverse Peripheriemodule wie eine UART Schnittstelle, einen micro-USB Anschluss oder einen VGA Ausgang. \\
+In dieser Arbeit wird zunächst der konzeptuelle Aufbau des Funktionsgenerators erläutert, dann werden die einzelnen Komponenten, aus denen er besteht, sowie die interne Taktung der Komponenten erläutert.
+Schließlich wird noch ein Funktionstest durchgeführt, bei dem die theoretisch erwarteten Resultate den tatsächlichen gegenübergestellt werden.
+Sämtlicher Quellcode findet sich im GitHub-Repository unter folgender URL: \\
+\href{https://github.com/markushart/studienarbeit_function_generator.git}{\code{https://github.com/markushart/studienarbeit\_function\_generator.git}}
