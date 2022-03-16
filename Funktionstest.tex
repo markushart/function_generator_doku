@@ -5,18 +5,15 @@ Besonders interessant ist hierbei, in welchem Frequenzbereich der Generator zuve
 
 \section{theoretische Limitierungen}
 Um den praktischen Nutzen des Funktionsgenerators einzuschätzen, werden die Grenzen der einstellbaren Frequenz, die Auflösung und der Spannungsbereich berechnet.
-Für die Spannung ergeben sich diese Werte aus dem Datenblatt des eingesetzten DACs, dieser kann in einem Bereich von 0 bis 5,5 V eingesetzt werden, wobei die Referenzspannung 2,7 V nicht unterschreiten darf \cite{PmodDA2}.
-Für den Betrieb auf dem Basys 3 Board läuft der Spannungsbereich von 0 bis 3,3 V, da hier die Ausgangsspannung des Boards der limitierende Faktor ist.
+Für die Spannung ergeben sich diese Werte aus dem Datenblatt des eingesetzten DACs.
+Dieser kann in einem Bereich von 0 bis 5,5 V eingesetzt werden, wobei die Referenzspannung 2,7 V nicht unterschreiten darf \cite{PmodDA2}.
+Für den Betrieb auf dem Basys 3-Board läuft der Spannungsbereich von 0 bis 3,3 V, da hier die Ausgangsspannung des Boards der limitierende Faktor ist.
 Nachfolgend werden noch der Frequenzbereich und die Auflösung bestimmt.
 
 \subsection{Frequenzbereich}
 Der Systemtakt $f_{sys}$ des Generators beträgt 100 MHz.
 Der Frequenzbereich der Funktionen, die er ausgeben kann, reicht von ca. 0,0877 Hz bis zu ca. 735 kHz für die Rampen- und Rechteckfunktion.
-Für die Zick-Zack-Funktion beträgt $f_{max}$ nur die Hälfte, also ca. 365 kHz.
-Die Frequenz $f_{count}$ ist die Frequenz mit der der interne Zähler der Funktionsbausteine hochzählt und beträgt ein 64tel des Systemtakts $f_{sys}$ (siehe \cref{test:theo:freq:fcount}).
-Die minimale Frequenz $f_{min}$ errechnet sich aus dem maximalen Zählstand, der wiederum abhängig ist von seiner Bitbreite \code{clk\_width} (siehe \cref{test:theo:freq:fmin}).
-Die maximale Frequenz ergibt sich aus dem Shannon'schen Abtasttheorem, nach dem die minimale Abtastfrequenz eines Signals doppelt so groß sein muss, wie die Frequenz des abgetasteten Signals.
-In diesem Fall entspricht die Abtastfrequenz $f_{count}$ und das abgetastete Signal dem Ausgangssignal, woraus folgt, dass das ausgehende Signal nur halb so groß sein kann, wie $f_{count}$ (siehe \cref{test:theo:freq:fmin}).
+Für die Zick-Zack-Funktion beträgt $f_{max}$ nur die Hälfte, also ca. 365 kHz.\\
 
 \begin{align}
   f_{count} &= \frac{f_{sys}}{68} \label{test:theo:freq:fcount}\\  
@@ -24,11 +21,18 @@ In diesem Fall entspricht die Abtastfrequenz $f_{count}$ und das abgetastete Sig
   f_{min} &= \frac{f_{count}}{2^{clk\_width} - 1} \label{test:theo:freq:fmin}
 \end{align}
 
+Die Frequenz $f_{count}$ ist die Frequenz mit der der interne Zähler der Funktionsbausteine hochzählt.
+Er beträgt ein 64tel des Systemtakts $f_{sys}$ (siehe \cref{test:theo:freq:fcount}).
+Die minimale Frequenz $f_{min}$ errechnet sich aus dem maximalen Zählstand, der wiederum abhängig ist von seiner Bitbreite \code{clk\_width} (siehe \cref{test:theo:freq:fmin}).
+Die maximale Frequenz ergibt sich aus dem Shannon'schen Abtasttheorem, nach dem die minimale Abtastfrequenz eines Signals doppelt so groß sein muss, wie die Frequenz des abgetasteten Signals.
+In diesem Fall entspricht die Abtastfrequenz $f_{count}$ und das abgetastete Signal dem Ausgangssignal, woraus folgt, dass das ausgehende Signal nur halb so groß sein kann, wie $f_{count}$ (siehe \cref{test:theo:freq:fmin}).
+
+
 \subsection{Auflösung}
 Die Auflösung des analogen Ausgangssignals hängt sowohl von der Geschwindigkeit ab, mit der das digitale Signal analogisiert werden kann, als auch von der maximalen Anzahl digital darstellbarer Werte.
 Überschreitet die Frequenz des analogen Signals $f$ die Grenzfrequenz $f_{grenz}$, so fällt die Auflösung $R$ reziprok zu $f$ ab (siehe \cref{test:theo:res:plot}).
 Oberhalb von $f_{grenz}$ ist die Auflösung durch die Bitbreite des ADCs begrenzt.
-Da es sich um einen 12-Bit Wandler handelt, beträgt die Anzahl darstellbarer Werte und damit auch die höchste Auflösung $2^{12} = 4096$.
+Da es sich um einen 12-Bit Wandler handelt, beträgt die Anzahl darstellbarer Werte und damit auch die höchste Auflösung $2^{12} - 1 = 4095$.
 Diesen Wert nimmt die Auflösung an, wenn die Frequenz kleiner als $f_{grenz}$ ist (siehe \cref{test:theo:freq:fgrenz}).
 
 \begin{align}
@@ -85,13 +89,13 @@ Das digitale Oszilloskop Analog Discovery 2 von digilent wird an einen Laptop an
 
 \subsection{Versuchsdurchführung}
 Um zunächst die korrekte Ausgabe der Funktionsverläufe zu überprüfen, werden alle vier Verläufe nacheinander bei konstanter Frequenz $f=100Hz$ über die UART-Schnittstelle konfiguriert und die erfassten Signale dokumentiert.
-Der eingestellte \analog{low} und \analog{high} Wert beträgt 0 bzw. 3,3 V.
-Anschließend werden alle Funktionen der UART-Schnittstelle überprüft, indem der jeweilige Befehl mit einem dazu passenden Argument abgeschickt wird.
+Der eingestellte \analog{low} und \analog{high} Wert beträgt 0 bzw. 3,3 V.\\
+Anschließend werden alle Funktionen der UART-Schnittstelle überprüft, indem der jeweilige Befehl mit einem dazu passenden Argument abgeschickt wird. \\
 Schließlich wird noch der Frequenzbereich anhand der Zick-Zack-Funktion untersucht.
-Dazu wird ein Wert knapp unterhalb von $f_{min}$ und ein Wert oberhalb von $f_{max}$ eingestellt.
+Dazu wird ein Wert knapp unterhalb von $f_{min}$, ($f = 0,08Hz$), und ein Wert oberhalb von $f_{max}$, ($f = 1MHz$), eingestellt.
 Dazwischen wird, von 0.1 Hz aufwärts, mit jedem Schritt die eingestellte Frequenz mit 10 multipliziert.
 Die Werte für \analog{low} und \analog{high} werden wieder auf 0 und 3,3 V gesetzt.
-Auffäligkeiten im Funktionsverlauf werden festgehalten und die Daten werden dann noch im CSV Format für weitere Auswertungen abgespeichert.
+Auffäligkeiten im Funktionsverlauf werden festgehalten und die Daten werden dann noch im CSV Format für weitere Auswertungen abgespeichert. \\
 Um die Frequenz der Zick-Zack Funktion zu messen, werden alle Datenpunkte mitAusgangsspannung $U < 0,5 V$ betrachtet.
 Aus den Zeitkomponenten nahe beieinander liegender Punkte wird dann der Mittelwert gebildet.
 Die Differenz zweier aufeinanderfolgender Mittelwerte kann als Näherung für die Zykluszeit $T$ betrachtet werden, aus der dann die Frequenz des Signals mit $f = 1 / T$ berechnet wird.
@@ -159,17 +163,17 @@ Der Mittelwert des konstanten Signals betrug $\overline{U}_{c}=3,24 V$, beim Rec
 Der Generator ließ sich problemlos per UART konfigurieren.
 Alle eingegebenen Befehle führten zu der erwarteten Ausgabe am analogen Ausgang.\\
 Beim Abtasten der Frequenz  ergab sich bei Unterschreiten von $f_{min}$ ($f = 0,08Hz$) eine wesentlich höhere Frequenz von 20,5 Hz. 
-Im niedrigen Frequenzbereich konnten nur geringe Abweichungen von der eingestellten Frequenz gemessen werden.
-Je näher $f$ jedoch $f_{max}$ kam, desto stärker wich die gemessene von der eingestellten Frequenz ab.
+Im niedrigen Frequenzbereich konnten nur geringe Abweichungen von der eingestellten Frequenz gemessen werden. \\
+Je näher $f$ jedoch $f_{max}$ kam, desto stärker wich die gemessene Frequenz $f_{ist}$ von der eingestellten Frequenz $f_{soll}$ ab.
 Die Messergebnisse der Frequenzmessung finden sich in \cref{test:real:res:ftab}.
 
 \begin{table}[h]
   \begin{tabular}[h]{|l|r|r|r|r|r|r|r|r|r|r|}
     \hline
-    $f_{soll}$ in Hz & 0,08 & 0,1 & 1 & 10 & 100 & $10^3$ & $10^4$ & $10^5$ & $3,5 \cdot 10^5$ & $10^6$\\ \hline
-    $f_{ist}$ in Hz & 20,5 & 0,100 & 1,01& 10,1 & 101 & 999 & $10^4$ & $9,81 \cdot 10^4$ & $2,94 \cdot 10^5$ & - \\ \hline
+    $f_{soll}$ & 0,08 & 0,1 & 1 & 10 & 100 & $10^3$ & $10^4$ & $10^5$ & $3,5 \cdot 10^5$ & $10^6$\\ \hline
+    $f_{ist}$ & 20,5 & 0,100 & 1,01& 10,1 & 101 & 999 & $10^4$ & $9,81 \cdot 10^4$ & $2,94 \cdot 10^5$ & - \\ \hline
   \end{tabular}
-  \caption{Diese Tabelle stellt die eingestellten Frequenzen $f_{soll}$ den gemessenen Frequenzen $f_{ist}$ gegenüber. Für $f_{soll} = 10^6$ konnte die Frequenz nicht bestimmt werden.} \label{test:real:res:ftab}
+  \caption{Diese Tabelle stellt die eingestellten Frequenzen $f_{soll}$ in Hz den gemessenen Frequenzen $f_{ist}$ in Hz gegenüber. Für $f_{soll} = 10^6 Hz$ konnte die Frequenz nicht bestimmt werden.} \label{test:real:res:ftab}
 \end{table}
 
 Die Verläufe ab einer Frequenz $f > 10 kHz$ wiesen starke Schwankungen auf, die zu einem unsauberen Signal führten (siehe \cref{test:real:res:zzplot}).
@@ -222,20 +226,20 @@ Außerdem ändert sich der Wert nicht sprunghaft, sondern eher entsprechend der 
 \end{figure}
 
 \subsection{Auswertung}
-Der Funktionsgenerator gibt die mit per UART konfigurierten Signale korrekt aus.
-Allerdings scheinen, auch durch den DAC-Konverter, die Genauigkeit und die Bandbreite beschränkt zu sein.
+Der Funktionsgenerator gibt die per UART konfigurierten Signale korrekt aus. 
+Allerdings scheinen, auch durch den DAC-Konverter, die Genauigkeit und die Bandbreite beschränkt zu sein. \\
 Die ungenaue Ausgabe der Spannungswerte \analog{high} und \analog{low} könnte daher kommen, dass der Chip die Versorgungsspannung des Basys 3 Boards als Referenzspannung nutzt.
-Da aber mehrere Verbraucher von dieser Spannung gespeist werden, kann sie schnell ungenau werden.
+Da aber mehrere Verbraucher und der Chip selsbt von dieser Spannung gespeist werden, kann sie schnell ungenau werden.
 Ein anderer Chip mit einem weiteren Pin für eine Referenzspannung könnte die Genauigkeit erhöhen.
 Für einfache Signalverläufe ist sie aber ausreichend. \\
-Stellt man die Frequenz auf $f < f_{min}$ ein, so stellt man fest, dass eine größere Frequenz ausgegeben wird.
+Stellt man die Frequenz auf $f < f_{min}$ ein, so stellt man fest, dass eine größere Frequenz als $f_{min}$ ausgegeben wird.
 Dies ist damit zu erklären, dass der interne Zähler eine beschränkte Breite von 24 Bit hat.
 Damit beträgt sein maximaler Wert $2^{24} - 1 = 16.777.215$.
-Vom Konfigurationswert werden nur die letzten 24 Stellen übernommen, sodass sich der interne Wert wiederum kleiner als $2^24 - 1$ ist.
+Vom Konfigurationswert werden nur die letzten 24 Stellen übernommen, sodass sich der interne Wert wiederum kleiner als $2^{24} - 1$ ist.
 Daraus resultiert eine höhere Frequenz als der Nutzer konfigurieren wollte.\\
 Die Frequenz zeigt sich bis $f = 10^4 Hz$ stabil, jedoch wird sie zu $f_{max}$ hin sehr ungenau.
 Dies ist auf die begrenzte Geschwindigkeit des Zählers der Funktionsbausteine zurückzuführen.
-Es können nur Zykluzeiten eingestellt werden, die Vielfache der Zählerzykluszeit sind.
+Es können nur Zykluszeiten eingestellt werden, die Vielfache der Zählerzykluszeit sind.
 Dieser Umstand fällt dann stärker ins Gewicht, wenn es nur wenige Zyklen abzuzählen gibt, was bei sehr hohen Frequenzen der Fall ist. \\
 Auch der ungenaue Signalverlauf lässt sich teilweise mit der begrenzten Zähler-geschwindigkeit und der daraus resultierende sinkenden Auflösung erklären.
 Jedoch hätte der Verlauf immer mehr die Form einer Treppe annehmen müssen, da die Auflösung mit steigender Frequenz abnimmt und die Änderung der Spannung pro Konvertierung größer wird.
