@@ -16,8 +16,8 @@ Der Generator kann auf vier verschiedene Funktionsbausteine zurückgreifen, die 
     Der Anteil der Zykluszeit $T$, in dem der Ausgang auf \analog{high} ist, wird über den Parameter dutycycle eingestellt.
     Die Dauer des \analog{high}-Pegels bzw. \analog{low}-Pegels, $T_{h}$ und $T_{l}$ berechnen sich folgendermaßen:
     \begin{align}
-      T_{l} &= T \cdot \frac{dutycycle}{255}, dutycycle \in \{0, 1, ..., 255\} \\
-      T_{h} &= T - T_{l} 
+      T_{l} &= T \cdot \frac{dutycycle}{255}, dutycycle \in \{0, 1, ..., 255\} \label{Concept:Feature:Func:eqdc1} \\
+      T_{h} &= T - T_{l} \label{Concept:Feature:Func:eqdc2}
     \end{align}
     Auf diese Art lassen sich Rechteck-Signale mit einstellbarer Pulsweite erzeugen.
     Diese sogenannten PWM-Signale (``\textbf{P}uls \textbf{W}eiten \textbf{M}odulation'') werden in vielen technischen Anwendungen verwendet.
@@ -31,20 +31,20 @@ Der Generator kann auf vier verschiedene Funktionsbausteine zurückgreifen, die 
 \begin{figure}[h] \centering
   {
     \pgfplotsset{
-    xtick={0, 30, 60, 90},
-    ytick={0, 1.1, 2.2, 3.3},
+    xtick={0, 15, 30, 45, 60, 75, 90},
+    ytick={0, 0.55, 1.1, 1.65, 2.2, 2.75, 3.3},
     xmin=0, xmax=90,
     ymin=-0.2, ymax=3.5,
     % xlabel=$t$,
-    xticklabels={$0$, $T$, $2T$, $3T$,}, % \pgfmathprintnumber{\tick}},
-    yticklabels={, , ,},
+    xticklabels={$0$, , $T$, , $2T$, , $3T$,}, % \pgfmathprintnumber{\tick}},
+    yticklabels={},
     grid=major,
     width=0.52\textwidth,
     height=0.4\textwidth}
   % constant
   \subfloat[][konstante Funktion]{ 
     \begin{tikzpicture}
-      \begin{axis}[yticklabels={$h$, , ,$l$}, ylabel=$U(t)$]
+      \begin{axis}[yticklabels={$h$, , , , , ,$l$}, ylabel=$U(t)$]
         \addplot[color=blue] coordinates{(0, 1.75)(90, 1.75)};
       \end{axis}
     \end{tikzpicture}
@@ -63,7 +63,7 @@ Der Generator kann auf vier verschiedene Funktionsbausteine zurückgreifen, die 
   % zigzag \foreach \x in {0, 15, ..., 90} {(\x, 3.3)}
   \subfloat[][Zick-Zack-Funktion]{
     \begin{tikzpicture}
-      \begin{axis}[ylabel=$U(t)$, xlabel=$t$]
+      \begin{axis}[yticklabels={$h$, , , , , ,$l$}, ylabel=$U(t)$, xlabel=$t$]
         \addplot[color=blue] coordinates{(0, 0)(15, 3.3)(30, 0)(45, 3.3)(60, 0)(75, 3.3)(90, 0)};
       \end{axis}
     \end{tikzpicture}

@@ -33,13 +33,15 @@
 \pgfplotsset{compat=newest}
 % für svg bilder:
 \usepackage{svg}
+% um den font zu ändern:
+\usepackage{lmodern}
 
 % formatierung von code im text:
 \newcommand{\code}[1]{\texttt{#1}}
 % formatierung von bit vektoren, digitalen werten und analogen Werten
 \newcommand{\bit}[1]{\code{#1}}
-\newcommand{\bitvect}[1]{\code{#1}}
-\newcommand{\analog}[1]{\code{#1}}
+\newcommand{\bitvect}[1]{\textbf{\bit{#1}}}
+\newcommand{\analog}[1]{\textsf{\itshape{#1}}}
 % low-activ Signal:
 \newcommand{\lowactive}[1]{$\overline{\bit{#1}}$}
 

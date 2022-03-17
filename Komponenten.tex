@@ -1,5 +1,5 @@
 \chapter{Komponenten}
-Nachdem im vorherigen Kapitel der grundlegende Aufbau des Funktionsgenerators erklärt wurde, sollen nun die einzelnen Komponenten aus denen der Funktionsgenerator aufgebaut ist genauer erläutert werden.
+Nachdem im vorherigen Kapitel der grundlegende Aufbau des Funktionsgenerators erklärt wurde, sollen nun die einzelnen Komponenten aus denen er aufgebaut ist genauer erläutert werden.
 Vorab muss noch erwähnt werden, dass jede Komponente über ein \bit{CLK} und ein \lowactive{CE} Signal verfügen.
 \lowactive{CE} ist der Chip-Enable Eingang. \bit{CLK} ist der Eingang für das Taktsignal.
 Alle Komponenten führen einen Arbeitsschritt aus, wenn an \lowactive{CE} \bit{low} anliegt und \bit{CLK} eine steigende Flanke detektiert.
@@ -11,17 +11,25 @@ Darüber hinaus benötigte Funktionen, die über eine eigene Implementierung ver
 
 \subsection{Zähler} \label{Comp:Arith:Count}
 Der Zähler bildet die Basiskomponente der Funktionskomponenten. Er eignet sich sehr gut, um die Zeit zu messen, da sich die Zeit seit dem letzten Rücksetzen des Zählers $T_{R}$ immer aus dem Zählstand $N$ und der Taktzeit des Zählers $T_{count}$ berechnen lässt: $T_{R} = N \cdot T_{count}$. So kann durch wiederholtes Rücksetzen des Zählers bei einem bestimmten Zählstand ein zyklischer Funktionsverlauf erstellt werden.
-Der Zählstand selbst dient in diesem Fall als diskrete X-Komponente, der dann von der Funktionskomponente ein Y-Wert zugeordnet wird.\\
-Der hier implementierte Zähler kann allerdings schon selbst als Funktionskomponente mit dem Ausgang \bitvect{o\_count} für die Funktion $o\_count = inc \cdot N \cdot (-1) ^ {1 - D}, N \in \{0, 1, 2, \dots, max\_ticks\}$ gesehen werden.
-Die Komponente besitzt nämlich die Eingänge \bitvect{inc}, \bit{D} und \bitvect{max\_ticks}. Diese erfüllen folgende Aufgabe:
+Der Zählstand selbst dient in diesem Fall als diskreter X-Wert, dem dann von der Funktionskomponente ein Y-Wert zugeordnet wird.\\
+Der hier implementierte Zähler kann allerdings schon selbst als Funktionskomponente betrachtet werden.
+Durch die Eingänge \bitvect{inc}, \bit{D} und \bitvect{max\_ticks} kann er so konfiguriert werden, dass sein Ausgangswert \bitvect{o\_count} für jeden Zählstnd \bitvect{N} der \cref{Comp:Arith:Count:eq} entspricht.
+
+\begin{align}
+o\_count &= inc \cdot N \cdot (-1) ^ D, N \in \{0, 1, 2, \dots, max\_ticks\} \label{Comp:Arith:Count:eq}
+\end{align}
+
+\bit{D}, \bitvect{inc} und \bitvect{max\_ticks} erfüllen dabei folgende Aufgabe:
+
 \begin{itemize}
 \item \bitvect{max\_ticks}: Bit-Vektor, der den maximalen Wert repräsentiert, ab dem der Zähler automatisch zurückgesetzt wird.
-Diese Funktion erleichtert es, die Zykluszeit einer Funktion $T_{func}$ als Zeitraum zwischen zwei Rücksetzungen festzulegen: $T_{func} = max_{ticks} \cdot T_{func}$
+Diese Funktion erleichtert es, die Zykluszeit einer Funktion $T_{func}$ als Zeitraum zwischen zwei Rücksetzungen festzulegen: $T_{func} = max\_ticks \cdot T_{func}$
 \item \bit{D}: Richtung, in die der Zähler zählen soll: \bit{low} heißt aufwärts, \bit{high} heißt abwärts
   \item \bitvect{inc}: Dieser Bit-Vektor repräsentiert das Inkrement, um das der Zähler hoch- bzw. runterzählen soll
 \end{itemize}
 
-Der maximale Zählstand ist durch die Anzahl der Stellen von \bitvect{o\_count} beschränkt. Sie kann generisch durch den Wert \code{data\_width} bestimmt werden. \\
+Der maximale Zählstand ist durch die Anzahl der Stellen von \bitvect{o\_count} beschränkt.
+Diese Anzahl kann generisch durch den Wert \code{data\_width} bestimmt werden. \\
 Würde es im nächsten Takt dazu kommen, dass der Zählstand größer als \bitvect{max\_ticks} wird (Überlauf), setzt er sich automatisch wieder auf Null zurück.
 Würde es im nächsten Takt dazu kommen, dass der Zählstand kleiner als Null wird (Unterlauf), wird der Zähler auf \bitvect{max\_ticks} zurückgesetzt.
 Zusätzlich kann der Zähler asynchron auf Null gesetzt werden, wenn der Eingang \lowactive{R} auf \bit{low} gesetzt wird.
@@ -80,7 +88,7 @@ Der große Vorteil dieser Methode liegt darin, dass jede Komponente weiterhin di
 \begin{figure}[h]
 \begin{tikztimingtable} 
   CLK                             & H 9{2L 2H} L    \\
-  $\overline{\mbox{CLK\_Enable}}$ & H 3{4L 8H} L    \\
+  $\overline{\mbox{SCLK\_Enable}}$ & H 3{4L 8H} L    \\
   aktive Zyklen                   & 3L 3{2H 10L} L  \\
   \extracode
 
@@ -179,11 +187,46 @@ Es gibt folgende Eingangssignale:
   
 \subsection{Instruktionsauswertung} \label{Comp:Conf:Inst}
 Die vom Nutzer gesendeten Bytes werden in einem vier Byte großem Schieberegister gespeichert.
-In \cref{Comp:Conf:Inst:Tab} sind alle Befehle, ihre Funktion und die Position der Argumente im Speicher beschrieben. \\
+Das erste der vier Byte repräsentiert das Befehlsbyte, das steuert, welcher Befehl ausgeführt wird.
+Die folgenden drei Byte sind die Argumente des Befehls.
+Beispielsweise kann der \bitvect{high}-Wert der Funktionen mit dem hexadezimalen Befehl \bitvect{0x01000FFF} auf das Maximum der Ausgangsspannung gesetzt werden.
+Dabei ist darauf zu achten, dass für das Argument nur der Wert der Bits Null bis Elf verwendet wird (Bit Null ist das LSB) und die Bits 12 bis 23 ignoriert werden. \\
+Die Zykluszeit des Signals ist das Produkt aus den eingestellten \bitvect{cyc\_ticks} und der Zykluszeit $T_{count}$ des internen Zählers.
+Dieser wird mit einem 68tel des Systemtakts $f_{sys} = 100MHz$ betrieben.
+Somit berechnet sich die eingestellte Frequenz nach \cref{Comp:Conf:Inst:eqct}.
+
+\begin{align}
+  f &= \frac{1}{T_{count} \cdot cyc\_ticks} = \frac{f_{sys}}{68 \cdot cyc\_tiks} = \frac{1,470588 MHz}{cyc\_ticks} \label{Comp:Conf:Inst:eqct}
+\end{align}
+
+Die Ausgangsspannungen \analog{high} und \analog{low} berechnen sich aus den Bitvektoren \bitvect{high} und \bitvect{low} und der Referenzspannung $V_{ref} = 3,3 V$ nach \cref{Comp:Conf:Inst:eqh} und \cref{Comp:Conf:Inst:eql}.
+  
+\begin{align}
+  \analog{high} &= \frac{V_{ref} \cdot \bitvect{high}}{2^{12} - 1} \label{Comp:Conf:Inst:eqh} \\
+  \analog{low} &= \frac{V_{ref} \cdot \bitvect{low}}{2^{12} - 1} \label{Comp:Conf:Inst:eql}
+\end{align}
+
+Der \analog{high}- und \analog{low}-Anteil des Rechtecksignals kann über den dutycycle eingestellt werden.
+Die Berechnung dieser Anteile findet sich in \cref{Concept:Feature:Func:eqdc1} und \cref{Concept:Feature:Func:eqdc2}.\\
+Die aktuell ausgegebene Funktion kann über den Befehl \code{SETWVFRM} eingestellt werden.
+Dabei entscheiden die letzten beiden Bits, welche Funktion ausgewählt wird.
+Welches Bitmuster zu welcher Funktion gehört, zeigt \cref{Comp:Conf:Inst:WVFRMtab}.
+
+\begin{table}[h] \centering
+  \begin{tabular}{|l|r|r|r|r|}
+     \hline
+     Bitmuster   & 00        & 01       & 10        & 11    \\ \hline
+     Funktion    & Konstante & Rechteck & Zick-Zack & Rampe \\ \hline
+  \end{tabular}
+  \caption{Die Bitmuster des \code{SETWVFRM} Befehls und die zugehörigen Funtionen.} \label{Comp:Conf:Inst:WVFRMtab}
+\end{table} 
+  
+
+In \cref{Comp:Conf:Inst:INSTtab} sind alle Befehle, ihre Funktion und die Position der Argumente im Speicher beschrieben. \\
 
 \begin{table}[h]
   \centering
-  \begin{tabular}[h]{|l|r|r|l|}
+  \begin{tabular}{|l|r|r|l|}
     \hline
     Befehlsname  & Hex-Code & Argumentbits & Funktion\\ \hline
     SETCYCTICKS  & 0x01     & 23 - 0       & \makecell[l]{ändern der Zykluszeit der \\ aktuellen Funktion}\\ \hline
@@ -193,13 +236,9 @@ In \cref{Comp:Conf:Inst:Tab} sind alle Befehle, ihre Funktion und die Position d
     SETWVFRM     & 0x05     & 1 - 0        & \makecell[l]{ändern der Funktion}\\ \hline
     SETDIR       & 0x06     & 0            & \makecell[l]{ändern der Richtung \\der Rampenfunktion}\\ \hline
   \end{tabular}
-  \caption{Befehlssatz inklusive Funktion der Befehle.} \label{Comp:Conf:Inst:Tab}
+  \caption{Befehlssatz inklusive Funktion der Befehle.} \label{Comp:Conf:Inst:INSTtab}
 \end{table}
 
-Das erste der vier Byte repräsentiert das Befehlsbyte, das steuert, welcher Befehl ausgeführt wird.
-Die folgenden drei Byte sind die Argumente des Befehls.
-Beispielsweise kann der \bitvect{high}-Wert der Funktionen mit dem hexadezimalen Befehl \bitvect{0x01000FFF} auf das Maximum der Ausgangsspannung gesetzt werden.
-Dabei ist darauf zu achten, dass für das Argument nur der Wert der Bits Null bis Elf verwendet wird (Bit Null ist das LSB) und die Bits 12 bis 23 ignoriert werden.
 
 \section{DAC-Konverter} \label{Comp:DAC}
 Um den digital berechneten Ausgangswert in ein analoges Signal umzuwandeln, braucht es eine Komponente, die auf dem Basys 3 Board noch nicht vorhanden ist.
