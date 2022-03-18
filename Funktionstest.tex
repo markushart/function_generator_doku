@@ -1,5 +1,5 @@
 \chapter{Funktionstest}
-Nach der Implementierung des zuvor geschilderten Konzepts wurde ein Funktionstest durchgeführt.
+Nach der Implementierung des zuvor geschilderten Konzepts wird ein Funktionstest durchgeführt.
 Dazu werden zunächst die theoretischen Grenzen der Konfiguration getestet und danach die tatsächlichen Ausgabewerte mit den theoretischen verglichen.
 Besonders interessant ist hierbei, in welchem Frequenzbereich der Generator zuverlässig funktioniert.
 
@@ -22,10 +22,10 @@ Für die Zick-Zack-Funktion beträgt $f_{max}$ nur die Hälfte, also ca. 365 kHz
 \end{align}
 
 Die Frequenz $f_{count}$ ist die Frequenz mit der der interne Zähler der Funktionsbausteine hochzählt.
-Er beträgt ein 64tel des Systemtakts $f_{sys}$ (siehe \cref{test:theo:freq:fcount}).
+Er beträgt ein 68tel des Systemtakts $f_{sys}$ (siehe \cref{test:theo:freq:fcount}).
 Die minimale Frequenz $f_{min}$ errechnet sich aus dem maximalen Zählstand, der wiederum abhängig ist von seiner Bitbreite \code{clk\_width} (siehe \cref{test:theo:freq:fmin}).
 Die maximale Frequenz ergibt sich aus dem Shannon'schen Abtasttheorem, nach dem die minimale Abtastfrequenz eines Signals doppelt so groß sein muss, wie die Frequenz des abgetasteten Signals.
-In diesem Fall entspricht die Abtastfrequenz $f_{count}$ und das abgetastete Signal dem Ausgangssignal, woraus folgt, dass das ausgehende Signal nur halb so groß sein kann, wie $f_{count}$ (siehe \cref{test:theo:freq:fmin}).
+In diesem Fall entspricht die Abtastfrequenz $f_{count}$ und das abgetastete Signal dem Ausgangssignal, woraus folgt, dass das ausgehende Signal nur halb so groß sein kann, wie $f_{count}$ \cite{nyquist1928}. Damit berechnet sich $f_{max}$ nach \cref{test:theo:freq:fmax}.
 
 
 \subsection{Auflösung}

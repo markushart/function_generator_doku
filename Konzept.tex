@@ -10,7 +10,8 @@ Der Generator kann auf vier verschiedene Funktionsbausteine zurückgreifen, die 
 
 \begin{enumerate}
    \item \textbf{Konstante Funktion} \\ 
-    Die konstante analoge Spannung \analog{high} liegt am Ausgang an.
+    Eine konstante analoge Spannung \analog{high} liegt am Ausgang an.
+    Ein beispielhafter Signalverlauf ist in \cref{Concept:Plot:const} dargestellt.
   \item \textbf{Rechteck-Funktion} \\
     Der Wert wechselt zwischen \analog{high} und \analog{low} in der Frequenz $f$.
     Der Anteil der Zykluszeit $T$, in dem der Ausgang auf \analog{high} ist, wird über den Parameter dutycycle eingestellt.
@@ -21,11 +22,15 @@ Der Generator kann auf vier verschiedene Funktionsbausteine zurückgreifen, die 
     \end{align}
     Auf diese Art lassen sich Rechteck-Signale mit einstellbarer Pulsweite erzeugen.
     Diese sogenannten PWM-Signale (``\textbf{P}uls \textbf{W}eiten \textbf{M}odulation'') werden in vielen technischen Anwendungen verwendet.
+    Der Signalverlauf einer solchen Funktion könnte dem in \cref{Concept:Plot:square} entsprechen.
   \item \textbf{Zick-Zack-Funktion} \\
-    Der Analogwert steigt von \analog{low} bis \analog{high} linear an, erreicht er \analog{high}, fällt der Analogwert wieder kontinuierlich auf \analog{low} ab. Somit schwankt der Ausgangspegel mit der Frequenz $f$.
+    Der Analogwert steigt von \analog{low} bis \analog{high} linear an, erreicht er \analog{high}, fällt der Analogwert wieder kontinuierlich auf \analog{low} ab.
+    Somit schwankt der Ausgangspegel mit der Frequenz $f$.
+    Zur Veranschaulichung ist eine derartige Funktion in \cref{Concept:Plot:zigzag} dargestellt.
   \item \textbf{Rampen-Funktion} \\
-    Der Analogwert wächst, wie bei der Zick-Zack-Funktion, linear bis auf \analog{high} an, danach fällt er aber auf \analog{high} zurück.
+    Der Analogwert wächst, wie bei der Zick-Zack-Funktion, linear bis auf \analog{high} an, danach fällt er aber auf \analog{low} zurück.
     Alternativ kann die Rampe auch von \analog{high} her abfallen und bei Erreichen von \analog{low} wieder auf \analog{high} zurück springen.
+    In \cref{Concept:Plot:ramp} sieht man eine Rampfenfuntkion, die in Richtung \analog{high} ansteigt.
 \end{enumerate}
 
 \begin{figure}[h] \centering
@@ -40,12 +45,13 @@ Der Generator kann auf vier verschiedene Funktionsbausteine zurückgreifen, die 
     yticklabels={},
     grid=major,
     width=0.52\textwidth,
-    height=0.4\textwidth}
+    height=0.4\textwidth
+  }
   % constant
   \subfloat[][konstante Funktion]{ 
     \begin{tikzpicture}
-      \begin{axis}[yticklabels={$h$, , , , , ,$l$}, ylabel=$U(t)$]
-        \addplot[color=blue] coordinates{(0, 1.75)(90, 1.75)};
+      \begin{axis}[yticklabels={$l$, , , , , ,$h$}, ylabel=$U(t)$]
+        \addplot[color=blue, line width=1.5pt] coordinates{(0, 3.3)(90, 3.3)};
       \end{axis}
     \end{tikzpicture}
     \label{Concept:Plot:const}
@@ -54,7 +60,7 @@ Der Generator kann auf vier verschiedene Funktionsbausteine zurückgreifen, die 
   \subfloat[][Rechteckfunktion]{
     \begin{tikzpicture}
       \begin{axis}
-        \addplot[color=blue]  coordinates{(0, 0)(15, 0)(15, 3.3)(30, 3.3)(30, 0)(45, 0)(45, 3.3)(60, 3.3)(60, 0)(75, 0)(75, 3.3)(90, 3.3)};
+        \addplot[color=blue, line width=1.5pt]  coordinates{(0, 0)(15, 0)(15, 3.3)(30, 3.3)(30, 0)(45, 0)(45, 3.3)(60, 3.3)(60, 0)(75, 0)(75, 3.3)(90, 3.3)};
       \end{axis}
     \end{tikzpicture}
     \label{Concept:Plot:square}
@@ -63,8 +69,8 @@ Der Generator kann auf vier verschiedene Funktionsbausteine zurückgreifen, die 
   % zigzag \foreach \x in {0, 15, ..., 90} {(\x, 3.3)}
   \subfloat[][Zick-Zack-Funktion]{
     \begin{tikzpicture}
-      \begin{axis}[yticklabels={$h$, , , , , ,$l$}, ylabel=$U(t)$, xlabel=$t$]
-        \addplot[color=blue] coordinates{(0, 0)(15, 3.3)(30, 0)(45, 3.3)(60, 0)(75, 3.3)(90, 0)};
+      \begin{axis}[yticklabels={$l$, , , , , ,$h$}, ylabel=$U(t)$, xlabel=$t$]
+        \addplot[color=blue, line width=1.5pt] coordinates{(0, 0)(15, 3.3)(30, 0)(45, 3.3)(60, 0)(75, 3.3)(90, 0)};
       \end{axis}
     \end{tikzpicture}
     \label{Concept:Plot:zigzag}
@@ -73,7 +79,7 @@ Der Generator kann auf vier verschiedene Funktionsbausteine zurückgreifen, die 
   \subfloat[][Rampenfunktion]{
     \begin{tikzpicture}
       \begin{axis}[xlabel=$t$]
-        \addplot[color=blue, domain=0:90]  coordinates{(0, 0)(30, 3.3)(30, 0)(60, 3.3)(60, 0)(90, 3.3)(90, 0)};
+        \addplot[color=blue, domain=0:90, line width=1.5pt]  coordinates{(0, 0)(30, 3.3)(30, 0)(60, 3.3)(60, 0)(90, 3.3)(90, 0)};
       \end{axis}
     \end{tikzpicture}
     \label{Concept:Plot:ramp}
@@ -82,21 +88,22 @@ Der Generator kann auf vier verschiedene Funktionsbausteine zurückgreifen, die 
 \end{figure}
 
 \subsection{Konfiguration}
-Der Funktionsgenerator muss, um extern konfiguriert werden zu können, über eine Möglichkeit für Nutzereingaben verfügen.
+Der Funktionsgenerator muss, um extern konfiguriert werden zu können, über eine Möglichkeit zur Eingabe von Nutzerbefehlen verfügen.
 Zu diesem Zweck wird die UART-Schnittstelle auf dem Basys 3-Board genutzt.
 Über diese kann der Nutzer Konfigurationsbefehle per Computer versenden, die dann vom Generator interpretiert werden.
-Darüber hinaus nutzerseitig wurde ein Python-Script geschrieben, das die Kommunikation mit dem Generator vereinfacht.
 
 \section{Aufbau}
-Der Funktionsgenerator ist aus verschiedenen Einzelkomponenten zusammengesetzt.
-Ihre Verschaltung im Generator ist in \cref{Concept:FuncGenDia} zu sehen.
-In der Abbildung kann man gut erkennen, dass die verschiedenen Funktionen parallel arbeiten und von der Konfigurationsschnittstelle mit den Signalen \bitvect{cyc\_ticks}, \bitvect{high}, \bitvect{low}, \bitvect{thresh} und \bitvect{direction} gesteuert werden.
-Das Signal \bitvect{waveform} steuert den Multiplexer, der das Ausgabesignal \bitvect{y\_out} an die interne Schnittstelle des DAC-Wandlers weitergibt.
+
+In \cref{Concept:FuncGenDia} wird der konzeptuelle Aufbau des Funktionsgenerators dargestellt.
+Der Generator setzt sich aus verschiedenen Einzelkomponenten zusammen, die mit Signalen miteinander verknüpft werden.
+Die Komponente, die für die Konfiguration zuständig ist (hier \code{CONFIG} gennant), ist über die Steuersignale \bitvect{cyc\_ticks}, \bitvect{high}, \bitvect{low}, \bitvect{thresh} und \bitvect{direction} mit den Funktionsbausteinen \code{CONST}, \code{SQUARE}, \code{ZIGZAG} und \code{RAMP} verbunden.
+Darüber hinaus verfügt sie mit den Signalen \bit{RX} und \bit{TX} über Verbindungen zur UART Schnittstelle.
+Das Signal \bitvect{waveform} steuert den Multiplexer, der das Ausgabesignal \bitvect{y\_out} an die interne Schnittstelle des DAC-Wandlers \code{DAC} weitergibt.
 Diese Schnittstelle generiert daraus die Signale \lowactive{SYNC}, \bit{DINA}, \bit{DINB} und \bit{CLK} und transferiert sie dann an den DAC-Wandler.
 Dieser wandelt sie anschließend in ein analoges Signal um.
 
 \begin{figure}[h] \centering
-  \includegraphics[width=1.0\textwidth, angle=-90, origin=c]{function_generator}
+  \includegraphics[width=1\textwidth]{function_generator} % , angle=-90, origin=c
   \caption{Diagramm des Funktionsgenerators. Aus Gründen der Übersichtlichkeit sind die \bit{CLK} Signale und \lowactive{CE} Signale nicht angeschlossen dargestellt. Alle \bit{CLK} Signale sind an den Systemtakt angeschlossen und alle \lowactive{CE} Signale liegen auf Masse.}  \label{Concept:FuncGenDia}
 \end{figure}
 
