@@ -3,9 +3,10 @@ output/
 svg-inkscape/
 test/
 
-!main.tex
-!main.pdf
-*main.*
+*main*
+
+!*/main.tex
+!*/main.pdf
 
 imgs/.ipynb_checkpoints/
 *.ipynb
