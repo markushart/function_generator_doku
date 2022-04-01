@@ -3,7 +3,7 @@
 \setbeamertemplate{headline}
 
 \useinnertheme{default}
-\usecolortheme{beaver}
+\usecolortheme{orchid}
 
 
 \usepackage[utf8]{inputenc}
@@ -15,6 +15,14 @@
 \graphicspath{{../imgs/}}
 \usepackage{hyperref}
 \urlstyle{same}
+
+% für subfigure:
+\usepackage{caption}
+\usepackage{subcaption}
+% tikz pakete für die Erstellung von plots:
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=newest}
 
 \usepackage[
 backend=bibtex,
@@ -42,7 +50,7 @@ sorting=none
 
 
 \author{Markus Hartlage}
-\title[Entwicklung und Implementierung eines digitalen Funktionsgenerators in VHDL]{Entwicklung und Implementierung eines digitalen Funktionsgenerators in VHDL}
+\title[Digitaler Funktionsgenerator in VHDL]{Entwicklung und Implementierung eines digitalen Funktionsgenerators in VHDL}
 %\setbeamercovered{transparent} 
 %\setbeamertemplate{navigation symbols}{} 
 \titlegraphic{\includegraphics[width=3cm]{logo.png}}
@@ -66,143 +74,154 @@ sorting=none
 % Fazit
 
 \section{Konzept}
-\begin{frame}{Konzept}
 
-\begin{enumerate}
-	\item Stance phase
-	\begin{itemize}
-		\item Movement of the foot on the ground
-		\item Foot moves backwards (respective to walking direction)
-		\item Backwards movement forces the robot body to move froward
-	\end{itemize}
-	\item Swing phase
-	\begin{itemize}
-		\item Movement of the foot through free space without ground contact
-		\item Foot moves forwards 
-		\item Start- and endpiont are on the ground for transition from and to stance movement
-	\end{itemize}
-\end{enumerate}
+\begin{frame}{Konzept - Anforderungen}
+  \begin{itemize}
+    \item Ausgabe vier verschiedener Funktionsverläufe
+      \begin{itemize}
+        \item Konstante, Rechteck, Zick-Zack, Rampe
+      \end{itemize}
+    \item Konfiguration per UART-Schnittstelle
+  \end{itemize}
+
+\begin{figure}[h] \centering
+  {
+    \pgfplotsset{
+    xtick={0, 15, 30, 45, 60, 75, 90},
+    ytick={0, 0.55, 1.1, 1.65, 2.2, 2.75, 3.3},
+    xmin=0, xmax=90,
+    ymin=-0.2, ymax=3.5,
+    % xlabel=$t$,
+    xticklabels={$0$, , $T$, , $2T$, , $3T$,}, % \pgfmathprintnumber{\tick}},
+    yticklabels={},
+    grid=major,
+    width=0.5\textwidth,
+    height=0.3\textwidth
+  }
+  % constant
+    \begin{tikzpicture}
+      \begin{axis}[yticklabels={$l$, , , , , ,$h$}, ylabel=$U(t)$]
+        \addplot[color=blue, line width=1.5pt] coordinates{(0, 3.3)(90, 3.3)};
+      \end{axis}
+    \end{tikzpicture}
+    \label{Concept:Plot:const}
+  % square
+    \begin{tikzpicture}
+      \begin{axis}
+        \addplot[color=blue, line width=1.5pt]  coordinates{(0, 0)(15, 0)(15, 3.3)(30, 3.3)(30, 0)(45, 0)(45, 3.3)(60, 3.3)(60, 0)(75, 0)(75, 3.3)(90, 3.3)};
+      \end{axis}
+    \end{tikzpicture}
+    \label{Concept:Plot:square}
+
+  % zigzag \foreach \x in {0, 15, ..., 90} {(\x, 3.3)}
+    \begin{tikzpicture}
+      \begin{axis}[yticklabels={$l$, , , , , ,$h$}, ylabel=$U(t)$, xlabel=$t$]
+        \addplot[color=blue, line width=1.5pt] coordinates{(0, 0)(15, 3.3)(30, 0)(45, 3.3)(60, 0)(75, 3.3)(90, 0)};
+      \end{axis}
+    \end{tikzpicture}
+    \label{Concept:Plot:zigzag}
+  % ramp
+    \begin{tikzpicture}
+      \begin{axis}[xlabel=$t$]
+        \addplot[color=blue, domain=0:90, line width=1.5pt]  coordinates{(0, 0)(30, 3.3)(30, 0)(60, 3.3)(60, 0)(90, 3.3)(90, 0)};
+      \end{axis}
+    \end{tikzpicture}
+    \label{Concept:Plot:ramp}
+  }
+\end{figure}
+  \end{frame}
+
+\begin{frame}{Konzept - Aufbau}
+  \begin{itemize}
+    \item Aufbau aus Konfigurations-, Funktions- und DAC Komponente
+    \item zusätzliche Hardware: Uart-Interface und digital-analog Konverter
+  \end{itemize}
+
+  \begin{figure}
+    \includegraphics[scale=0.36]{fg_diagram_pres}
+  \end{figure}
 \end{frame}
 
-\section{Swing trajectory constraints}
-\begin{frame}{Swing trajectory constraints}
-\begin{itemize}
-	\item General swing phase constraints
-	\begin{itemize}
-		\item Start position
-		\item End position
-	\end{itemize}
-	\pause
-	\item Constraints due to the robot design
-	\begin{itemize}
-		\item Working space for each joint of a leg
-		\item Minimal required swing height
-		\item Acceleration and speed of joint drives
-	\end{itemize}
-	\pause
-	\item Environmental constraints
-	\begin{itemize}
-		\item Position and size of obstacles
-	\end{itemize}
-\end{itemize}
+\section{Komponenten}
+
+\begin{frame}{Komponenten - Konfiguration}
+    Aufbau als state machine:
+      \begin{itemize}
+        \item Byteweises Einlesen der UART Rx Signale 
+        \item Interpretation von vier Bytes als Befehl (Befehlscode + Argumente) 
+        \item Berechnung und Speicherung der neuen Konfiguration
+      \end{itemize}
+  % \begin{figure}
+  %   \includegraphics[scale=0.40]{config_state_machine}
+  % \end{figure}
+      \resizebox{\textwidth}{!}{
+      \input{../imgs/config_state_machine}
+}
 \end{frame}
 
-\section{Trajectory planning methods}
-\begin{frame}[allowframebreaks]{Trajectory planning methods --  Global approaches}
-	\begin{itemize}
-		\begin{columns}
-		\begin{column}{0.6\textwidth}
-		\item Roadmap
-		\begin{itemize}
-			\item Corners of obstacles are connected by straigth lines to form the shortest path along the obstacles
-			\item Obstacles must be known as polygons
-		\end{itemize}
-		\end{column}
-		\begin{column}{0.25\textwidth}
-		\begin{figure}
-		% \includegraphics[scale=.2]{img/latombe-roadmap}{\tiny\cite{latombe}}
-		\end{figure}
-		\end{column}
-		\end{columns}
-		
-		\begin{columns}
-		\begin{column}{0.6\textwidth}
-		\item Cell decomposition
-		\begin{itemize}
-			\item Free space divided into cells
-			\begin{itemize}
-				\item Exact decomposition
-				\item Approximate decomposition
-			\end{itemize}
-			\item Obstacles must be known
-			\item Neighbouring cells are represented in a graph
-			\item A path in the graph represents one possible trajectory
-		\end{itemize}
-		\end{column}
-		\begin{column}{0.25\textwidth}
-		\begin{figure}
-		% \includegraphics[width=\textwidth]{img/latombe-celldecomposition}{\tiny\cite{latombe}}
-		\end{figure}
-		\end{column}
-		\end{columns}
-		
-		\begin{columns}
-		\begin{column}{0.5\textwidth}
-		\item Potential field
-		\begin{itemize}
-			\item Free space is discretized in a mesh
-			\item Obstacle points and start point are weighted repelling
-			\item Goal point is weighted attracting
-			\item Trajectory is defined by a gradient descent
-			\item Problem of getting trapped in local minima
-			\item Obstacles must be known
-		\end{itemize}
-		\end{column}
-		\begin{column}{0.4\textwidth}
-		\begin{figure}
-		% \includegraphics[scale=.2]{img/latombe-potentialfield}{\tiny\cite{latombe}}
-		\end{figure}
-		\end{column}
-		\end{columns}
-		
-	\end{itemize}
+\begin{frame}{Komponenten - Square}
+  \begin{itemize}
+    \item nach 64 steigenden Flanken \emph{Counter} aktivieren
+    \item Ausgang auf \emph{low} wenn \emph{o\_count} $>$ \emph{thresh}, sonst \emph{high} 
+  \end{itemize}
+  \begin{figure}
+    \includegraphics[scale=0.28]{square}
+  \end{figure}
 \end{frame}
 
-\begin{frame}{Trajectory planning methods -- Local approaches}
-	\begin{itemize}
-		\item Self defined trajectory
-		\item Selecting additional constraints (e.g. approach angle)
-		\item Defining via points
-		\item Connencting via points by different methods
-		\begin{itemize}
-			\item Linear
-			\item Linear with parabolic blends
-			\item (Cubic) splines \textit{(one proposed approach by \textcite{zeng})}
-			\item Elliptic \textit{(approach used by \textcite{paskarbeit} on HECTOR)}
-		\end{itemize}
-		\item Collisions with obstacles must be handled or avoided
-		\begin{figure}		
-		% \includegraphics[width=0.3\textwidth]{img/zeng-splines} {\tiny\cite{zeng}}
-		% \includegraphics[width=.5\textwidth]{img/paskarbeit-ellipses}{ \tiny\cite{paskarbeit}}
-		\end{figure}
-		
-	\end{itemize}
+\begin{frame}{Komponenten - Rampe}
+  \begin{itemize}
+  \item  Abzählen von 64 Taktzyklen
+  \end{itemize}
+  \begin{figure}
+    \includegraphics[scale=0.28]{ramp_step0}
+  \end{figure}
 \end{frame}
 
-\begin{frame}{Deciding for one approach}
-\begin{itemize}
-\item In order to implement a trajectory generator one of these methods has to be chosen
-\item This decision is highly dependent on the robot it has to genereate trajectories for
-\item If the robot has a notion of it's surrounding space, a global approach is possible
-\item Otherwise a local approach has to be used and collisions have to be handled
-\item Since the global approaces use a discretisation of the space and therefore have to compute many possible paths to choose one for each step
-\item Using a naive local approach requires little computation and allows reusage of a path 
-\item A notion of the surrounding space in combination with a local approach can be used to minimize collisions by coosing optimal goal positions
-
-\end{itemize}
+\begin{frame}{Komponenten - Rampe}
+  \begin{itemize}
+    \item Aktivieren des Zählers
+  \end{itemize}
+  \begin{figure}
+    \includegraphics[scale=0.28]{ramp_step1}
+  \end{figure}
 \end{frame}
 
+\begin{frame}{Komponenten - Rampe}
+  \begin{itemize}
+    \item neuer Zählstand wird mit Amplitude multipliziert und \emph{Division} beginnt zu teilen
+  \end{itemize}
+  \begin{figure}
+    \includegraphics[scale=0.28]{ramp_step2}
+  \end{figure}
+\end{frame}
+
+\begin{frame}{Komponenten - Rampe}
+  \begin{itemize}
+    \item untere zwölf Bits von \emph{Q} plus \emph{low} ergeben \emph{y\_out}
+  \end{itemize}
+  \begin{figure}
+    \includegraphics[scale=0.28]{ramp_step3}
+  \end{figure}
+\end{frame}
+
+\begin{frame}{Komponenten - Zick-Zack}
+  \begin{itemize}
+    \item Zählrichtung wird mit Komperatoren geregelt
+    \item halbe Zykluszeit (\emph{cyc\_ticks} um ein Bit nach rechts geschoben)
+  \end{itemize}
+  \begin{figure}
+    \includegraphics[scale=0.28]{zigzag}
+  \end{figure}
+\end{frame}
+
+
+\section{Funktionstest}
+\begin{frame}{Komponenten - Funktionsbausteine}
+  
+\end{frame}
 \begin{frame}{Sources}
+ 
 \printbibliography[title={Sources},heading=bibintoc]
 \end{frame}
 
