@@ -22,7 +22,19 @@
 % tikz pakete für die Erstellung von plots:
 \usepackage{tikz}
 \usepackage{pgfplots}
+\usepackage{tikz-timing} % für timing-diagramme:
 \pgfplotsset{compat=newest}
+% für hyperlinks:
+\usepackage{hyperref}
+
+%\usepackage{xcolor}
+
+\usepackage{xintbinhex}
+\usepackage{siunitx}
+\sisetup{
+  locale = DE ,
+  per-mode = symbol
+}
 
 \usepackage[
 backend=bibtex,
@@ -48,6 +60,16 @@ sorting=none
 
 \usefonttheme[onlymath]{serif}
 
+% hexcounter
+\newcounter{hexcount}
+\newcommand{\hexcountmakro}{
+  \xintDecToHex{\the\value{hexcount}}
+  \ifnum \value{hexcount}=15
+    \setcounter{hexcount}{0}
+  \else
+    \addtocounter{hexcount}{1}
+  \fi
+}
 
 \author{Markus Hartlage}
 \title[Digitaler Funktionsgenerator in VHDL]{Entwicklung und Implementierung eines digitalen Funktionsgenerators in VHDL}
@@ -68,8 +90,8 @@ sorting=none
 %\end{frame}
 
 % Konzept
-% Funktionskomponenten
 % Konfiguration - hier kann ich vielleicht das python Interface zeigen
+% Funktionskomponenten
 % Funktionstests
 % Fazit
 
@@ -151,21 +173,28 @@ sorting=none
         \item Interpretation von vier Bytes als Befehl (Befehlscode + Argumente) 
         \item Berechnung und Speicherung der neuen Konfiguration
       \end{itemize}
-  % \begin{figure}
-  %   \includegraphics[scale=0.40]{config_state_machine}
-  % \end{figure}
       \resizebox{\textwidth}{!}{
-      \input{../imgs/config_state_machine}
-}
+        \input{../imgs/config_state_machine}
+      }
 \end{frame}
 
-\begin{frame}{Komponenten - Square}
+\begin{frame}{Komponenten - Rechteck}
   \begin{itemize}
     \item nach 64 steigenden Flanken \emph{Counter} aktivieren
     \item Ausgang auf \emph{low} wenn \emph{o\_count} $>$ \emph{thresh}, sonst \emph{high} 
   \end{itemize}
   \begin{figure}
-    \includegraphics[scale=0.28]{square}
+    \includegraphics[scale=0.32]{square}
+  \end{figure}
+\end{frame}
+
+\begin{frame}{Komponenten - Rampe}
+  \begin{itemize}
+  \item Abbildung des 24 Bit Zählstands auf 12 Bit Ausgang:
+    $$ y\_out = \frac{(high - low) \cdot o\_count}{cyc\_ticks} $$
+  \end{itemize}
+  \begin{figure}
+    \includegraphics[scale=0.28]{ramp}
   \end{figure}
 \end{frame}
 
@@ -180,7 +209,7 @@ sorting=none
 
 \begin{frame}{Komponenten - Rampe}
   \begin{itemize}
-    \item Aktivieren des Zählers
+    \item Aktivieren von \emph{Counter} und \emph{Division}
   \end{itemize}
   \begin{figure}
     \includegraphics[scale=0.28]{ramp_step1}
@@ -215,14 +244,139 @@ sorting=none
   \end{figure}
 \end{frame}
 
+\begin{frame}{Komponenten - Digital-Analog-Konverter}
+  \begin{itemize}
+  \item Implementierung des PmodDA2-Protokolls
+    \begin{itemize}
+      \item $\overline{\mbox{SYNC}}$: Chip-Enable Signal für den DAC
+      \item DINA, DINB: serielle DAC-Daten, aktuell nur Kanal A genutzt
+      \item CLK: DAC-Clock läuft mit \SI{25}{\mega\hertz}
+    \end{itemize}
+  \end{itemize}
+  \begin{figure}[h] \centering
+    \begin{tikztimingtable}
+      Bit Nr.                   & 17{2D{\hexcountmakro}} [white] \\ 
+      parallele Daten           & 33D{0x123}D{}                  \\
+      CLK                       & 34{C}                          \\
+      $\overline{\mbox{SYNC}}$  & H 32L H                        \\
+      DINA                      & 5X 4L 6L 2H 4L 2H 2L 4L 4H L   \\
+      \extracode
+      \vertlines[help lines]{0, 2, ..., 34}
+
+    \end{tikztimingtable}
+  \end{figure}
+\end{frame}
 
 \section{Funktionstest}
-\begin{frame}{Komponenten - Funktionsbausteine}
-  
+
+\begin{frame}{Funktionstest - Versuchsaufbau}
+  \begin{itemize}
+    \item Implementierung auf Basys 3 Board
+    \item Messung mit Analog Discovery 2
+  \end{itemize}
+  \begin{figure}
+    \includegraphics[scale=0.15]{testaufbau_annotated_fg}
+  \end{figure}
 \end{frame}
-\begin{frame}{Sources}
- 
-\printbibliography[title={Sources},heading=bibintoc]
+
+\begin{frame}{Funktionstest - Versuchsdurchführung}
+  \begin{itemize}
+  \item Ausführen und Kontrollieren von jedem Konfigurationsbefehl
+  \item Jede Funktion einmal bei \SI{100}{\hertz} mit $U_{low} = \SI{0}{\volt}$ und $U_{high} = \SI{3.3}{\volt}$ messen
+  \item Zick-Zack-Funktion zur Kontrolle des Frequenzbereichs mit folgenden Frequenzen $f$:
+    \begin{table}
+      \resizebox{0.95\textwidth}{!}{
+      \begin{tabular}{|l|r|r|r|r|r|r|r|r|r|r|}
+        \hline
+        $f$ in Hz & 0,08 & 0,1 & 1 & 10 & 100 & $10^3$ & $10^4$ & $10^5$ & $3,5 \cdot 10^5$ & $10^6$\\ \hline
+      \end{tabular}
+      }
+    \end{table}
+  \item $\SI{0.08}{\hertz} < f_{min}$ und $\SI{1}{\mega\hertz} > f_{max}$
+  \end{itemize}
+
+\end{frame}
+
+\pgfplotsset{
+  no markers,
+  grid=major,
+  xlabel=Zeit $t$ in ms,
+  ylabel=$U(t)$ in V,
+  ymin=-0.2, ymax=3.5,
+  scaled x ticks=false,
+  ytick={0, 0.55, 1.10, 1.65, 2.20, 2.75, 3.30},
+  yticklabels={0, 0.55, 1.10, 1.65, 2.20, 2.75, 3.30},
+  xtick={-0.0075, -0.005, -0.0025, 0, 0.0025, 0.005, 0.0075},
+  xticklabels={-7.5, -5, -2.5, 0, 2.5, 5, 7.5},
+  width=\textwidth,
+  height=0.6\textwidth}
+
+\begin{frame}{Funktionstest - Konstante bei \SI{100}{\hertz}}
+  \begin{itemize}
+    \item \SI{3.3}{\volt} kann nicht genau erreicht werden
+  \end{itemize}
+  \begin{figure}[h] \centering
+    \begin{tikzpicture}
+      \begin{axis}
+        \addplot table [x=Time (s), y=Channel 2 (V), col sep=comma, row sep=newline] {../test/const100Hz_small.csv};
+       \end{axis}
+     \end{tikzpicture}
+  \end{figure}
+\end{frame}
+
+\begin{frame}{Funktionstest - Rechteck bei \SI{100}{\hertz}}
+  \begin{itemize}
+    \item \SI{0}{\volt} wird unterschritten 
+  \end{itemize}
+  \begin{figure}[h] \centering
+    \begin{tikzpicture}
+      \begin{axis}
+        \addplot table [x=Time (s), y=Channel 2 (V), col sep=comma, row sep=newline] {../test/square100Hz_small.csv};
+      \end{axis}
+    \end{tikzpicture}
+  \end{figure}
+\end{frame}
+
+\begin{frame}{Funktionstest - Zick-Zack bei \SI{100}{\hertz}}
+  \begin{figure}[h] \centering
+    \begin{tikzpicture}
+      \begin{axis}
+        \addplot table [x=Time (s), y=Channel 2 (V), col sep=comma, row sep=newline] {../test/zigzag100Hz_small.csv};
+      \end{axis}
+    \end{tikzpicture}
+  \end{figure}
+\end{frame}
+
+\begin{frame}{Funktionstest - Rampe bei \SI{100}{\hertz}}
+  \begin{figure}[h] \centering
+    \begin{tikzpicture}
+      \begin{axis}
+        \addplot table [x=Time (s), y=Channel 2 (V), col sep=comma, row sep=newline] {../test/ramp100Hz_small.csv};
+      \end{axis}
+    \end{tikzpicture}
+  \end{figure}
+\end{frame}
+
+%pgfplotsset{
+  
+%}
+
+\begin{frame}{Funktionstest - bei \SI{100}{\kilo\hertz}}
+  \begin{figure}[h] \centering
+    \begin{tikzpicture}
+      \begin{axis}[xlabel=$t$ in µs,
+        xmin=-0.0000075, xmax=0.00001,
+        xtick={-0.0000075, -0.000005, -0.0000025, 0, 0.0000025, 0.000005, 0.0000075, 0.000010},
+        xticklabels={, -5, , 0, , 5, , 10}]
+        \addplot table [x=Time (s), y=Channel 2 (V), col sep=comma, row sep=newline] {../test/zigzag100000Hz_1cyc.csv};
+      \end{axis}
+    \end{tikzpicture}
+  \end{figure}
+\end{frame}
+
+\begin{frame}{Referenzen}
+  Source Code, Anleitung und Python Interface:\\ 
+  \href{https://github.com/markushart/studienarbeit_function_generator.git}{\small\texttt{https://github.com/markushart/studienarbeit\_function\_generator.git}}
 \end{frame}
 
 \end{document}
