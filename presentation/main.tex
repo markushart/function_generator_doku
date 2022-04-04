@@ -302,6 +302,7 @@ sorting=none
   grid=major,
   xlabel=Zeit $t$ in ms,
   ylabel=$U(t)$ in V,
+  xmin=-0.0075, xmax=0.0075,
   ymin=-0.2, ymax=3.5,
   scaled x ticks=false,
   ytick={0, 0.55, 1.10, 1.65, 2.20, 2.75, 3.30},
@@ -357,21 +358,66 @@ sorting=none
   \end{figure}
 \end{frame}
 
-%pgfplotsset{
-  
-%}
+\begin{frame}{Zick-Zack bei $f < f_{min}$ und $f > f_{max}$}
+  \begin{itemize}
+  \item Frequenzbereich:
+    \begin{itemize}
+      \item $f_{min} = \SI{0.0877}{\hertz}$
+      \item $f_{max} = \SI{367.5}{\kilo\hertz}$ für die Zick-Zack Funktion
+      \item $f_{max} = \SI{735}{\kilo\hertz}$ für Rampe und Rechteck
+    \end{itemize}
+  \item bei $f < f_{min}$ ist Ausgangsfrequenz \SI{20.5}{\hertz}
+    \begin{itemize}
+      \item interner Zählstand für \emph{cyc\_ticks} nicht mehr darstellbar
+    \end{itemize}
+  \item bei $f > f_{max}$ wird konstant \SI{0}{\volt} ausgegeben
+    \begin{itemize}
+      \item $\emph{cyc\_ticks} / 2 = 1$, \emph{direction} nicht mehr getoggelt
+    \end{itemize}
+  \end{itemize}
+\end{frame}
 
-\begin{frame}{Funktionstest - bei \SI{100}{\kilo\hertz}}
-  \begin{figure}[h] \centering
+\pgfplotsset{xtick={-0.0000075, -0.000005, -0.0000025, 0, 0.0000025, 0.000005, 0.0000075, 0.000010},
+  xticklabels={, -5, , 0, , 5, , 10},
+  yticklabels={0, , 1.10, , 2.20, , 3.30},
+  width=\textwidth, height=4cm
+}
+\begin{frame}{Funktionstest - Zick-Zack bei \SI{100}{\kilo\hertz} und \SI{350}{\kilo\hertz}}
+
+  \begin{figure}
     \begin{tikzpicture}
-      \begin{axis}[xlabel=$t$ in µs,
-        xmin=-0.0000075, xmax=0.00001,
-        xtick={-0.0000075, -0.000005, -0.0000025, 0, 0.0000025, 0.000005, 0.0000075, 0.000010},
-        xticklabels={, -5, , 0, , 5, , 10}]
-        \addplot table [x=Time (s), y=Channel 2 (V), col sep=comma, row sep=newline] {../test/zigzag100000Hz_1cyc.csv};
-      \end{axis}
-    \end{tikzpicture}
-  \end{figure}
+      \begin{axis}[xlabel={}, xmin=-0.0000075, xmax=0.00001, xticklabels={}]
+          \addplot table [x=Time (s), y=Channel 2 (V), col sep=comma, row sep=newline] {../test/zigzag100000Hz_5cyc.csv};
+        \end{axis}
+      \end{tikzpicture}
+
+      \begin{tikzpicture}
+        \begin{axis}[xlabel=$t$ in µs, xmin=-0.0000075, xmax=0.00001]
+          \addplot table [x=Time (s), y=Channel 2 (V), col sep=comma, row sep=newline] {../test/zigzag350000Hz_5cyc.csv};
+        \end{axis}
+      \end{tikzpicture}
+    \end{figure}
+  
+\end{frame}
+
+\section{Fazit}
+\begin{frame}{Fazit}
+  \begin{itemize}
+  \item UART-Schnittstelle funktioniert
+  \item Generierung von Funktionen
+    \begin{itemize}
+      \item zuverlässig von \SI{0.1}{\hertz} bis \SI{10}{\kilo\hertz}
+      \item $U_{high}$ und $U_{low}$ scheinen verschoben zu sein
+      \begin{itemize}
+        \item evtl. ungenaue Referenzspannung, da Referenzpannung der Versorgungsspannung entspricht
+      \end{itemize}
+      \item Darüber hinaus sehr unsaubere Funktionsverläufe
+      \begin{itemize}
+        \item sinkende Auflösung
+        \item evtl. zu langsame Änderung des DAC-Ausgangswerts
+      \end{itemize}
+    \end{itemize}
+  \end{itemize}
 \end{frame}
 
 \begin{frame}{Referenzen}
