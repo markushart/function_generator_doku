@@ -16,12 +16,10 @@
 \usepackage{hyperref}
 \urlstyle{same}
 
-% für subfigure:
-\usepackage{caption}
-\usepackage{subcaption}
 % tikz pakete für die Erstellung von plots:
 \usepackage{tikz}
 \usepackage{pgfplots}
+\usepgfplotslibrary{groupplots}
 \usepackage{tikz-timing} % für timing-diagramme:
 \pgfplotsset{compat=newest}
 % für hyperlinks:
@@ -306,76 +304,59 @@ sorting=none
   ymin=-0.2, ymax=3.5,
   scaled x ticks=false,
   ytick={0, 0.55, 1.10, 1.65, 2.20, 2.75, 3.30},
-  yticklabels={0, 0.55, 1.10, 1.65, 2.20, 2.75, 3.30},
+  yticklabels={0, , 1.10, , 2.20, , 3.30},
   xtick={-0.0075, -0.005, -0.0025, 0, 0.0025, 0.005, 0.0075},
   xticklabels={-7.5, -5, -2.5, 0, 2.5, 5, 7.5},
-  width=\textwidth,
-  height=0.6\textwidth}
+  width=0.5\textwidth,
+  height=4.5cm}
 
-\begin{frame}{Funktionstest - Konstante bei \SI{100}{\hertz}}
+\begin{frame}{Funktionstest - Funktionsverläufe bei \SI{100}{\hertz}}
   \begin{itemize}
-    \item \SI{3.3}{\volt} kann nicht genau erreicht werden
+    \item Frequenz wird korrekt ausgegeben
+    \item \SI{0}{\volt} wird unterschritten und \SI{3.3}{\volt} nicht erreicht
   \end{itemize}
-  \begin{figure}[h] \centering
-    \begin{tikzpicture}
-      \begin{axis}
-        \addplot table [x=Time (s), y=Channel 2 (V), col sep=comma, row sep=newline] {../test/const100Hz_small.csv};
-       \end{axis}
-     \end{tikzpicture}
+  \begin{figure}[h]
+      \begin{tikzpicture}
+        \begin{groupplot}[group style={
+            group size=2 by 2,
+            x descriptions at=edge bottom,
+            y descriptions at=edge left,
+            horizontal sep=1cm,
+            vertical sep=0.5cm}]
+          \nextgroupplot
+          \addplot table [x=Time (s), y=Channel 2 (V), col sep=comma, row sep=newline] {../test/const100Hz_small.csv};
+
+          \nextgroupplot
+          \addplot table [x=Time (s), y=Channel 2 (V), col sep=comma, row sep=newline] {../test/square100Hz_small.csv};
+
+          \nextgroupplot
+          \addplot table [x=Time (s), y=Channel 2 (V), col sep=comma, row sep=newline] {../test/zigzag100Hz_small.csv};
+
+          \nextgroupplot
+          \addplot table [x=Time (s), y=Channel 2 (V), col sep=comma, row sep=newline] {../test/ramp100Hz_small.csv};
+        \end{groupplot}
+      \end{tikzpicture}
   \end{figure}
 \end{frame}
 
-\begin{frame}{Funktionstest - Rechteck bei \SI{100}{\hertz}}
-  \begin{itemize}
-    \item \SI{0}{\volt} wird unterschritten 
-  \end{itemize}
-  \begin{figure}[h] \centering
-    \begin{tikzpicture}
-      \begin{axis}
-        \addplot table [x=Time (s), y=Channel 2 (V), col sep=comma, row sep=newline] {../test/square100Hz_small.csv};
-      \end{axis}
-    \end{tikzpicture}
-  \end{figure}
-\end{frame}
-
-\begin{frame}{Funktionstest - Zick-Zack bei \SI{100}{\hertz}}
-  \begin{figure}[h] \centering
-    \begin{tikzpicture}
-      \begin{axis}
-        \addplot table [x=Time (s), y=Channel 2 (V), col sep=comma, row sep=newline] {../test/zigzag100Hz_small.csv};
-      \end{axis}
-    \end{tikzpicture}
-  \end{figure}
-\end{frame}
-
-\begin{frame}{Funktionstest - Rampe bei \SI{100}{\hertz}}
-  \begin{figure}[h] \centering
-    \begin{tikzpicture}
-      \begin{axis}
-        \addplot table [x=Time (s), y=Channel 2 (V), col sep=comma, row sep=newline] {../test/ramp100Hz_small.csv};
-      \end{axis}
-    \end{tikzpicture}
-  \end{figure}
-\end{frame}
-
-\begin{frame}{Zick-Zack bei $f < f_{min}$ und $f > f_{max}$}
-  \begin{itemize}
-  \item Frequenzbereich:
-    \begin{itemize}
-      \item $f_{min} = \SI{0.0877}{\hertz}$
-      \item $f_{max} = \SI{367.5}{\kilo\hertz}$ für die Zick-Zack Funktion
-      \item $f_{max} = \SI{735}{\kilo\hertz}$ für Rampe und Rechteck
-    \end{itemize}
-  \item bei $f < f_{min}$ ist Ausgangsfrequenz \SI{20.5}{\hertz}
-    \begin{itemize}
-      \item interner Zählstand für \emph{cyc\_ticks} nicht mehr darstellbar
-    \end{itemize}
-  \item bei $f > f_{max}$ wird konstant \SI{0}{\volt} ausgegeben
-    \begin{itemize}
-      \item $\emph{cyc\_ticks} / 2 = 1$, \emph{direction} nicht mehr getoggelt
-    \end{itemize}
-  \end{itemize}
-\end{frame}
+% \begin{frame}{Zick-Zack bei $f < f_{min}$ und $f > f_{max}$}
+%   \begin{itemize}
+%   \item Frequenzbereich:
+%     \begin{itemize}
+%       \item $f_{min} = \SI{0.0877}{\hertz}$
+%       \item $f_{max} = \SI{367.5}{\kilo\hertz}$ für die Zick-Zack Funktion
+%       \item $f_{max} = \SI{735}{\kilo\hertz}$ für Rampe und Rechteck
+%     \end{itemize}
+%   \item bei $f < f_{min}$ ist Ausgangsfrequenz \SI{20.5}{\hertz}
+%     \begin{itemize}
+%       \item interner Zählstand für \emph{cyc\_ticks} nicht mehr darstellbar
+%     \end{itemize}
+%   \item bei $f > f_{max}$ wird konstant \SI{0}{\volt} ausgegeben
+%     \begin{itemize}
+%       \item $\emph{cyc\_ticks} / 2 = 1$, \emph{direction} wird nicht mehr getoggelt
+%     \end{itemize}
+%   \end{itemize}
+% \end{frame}
 
 \pgfplotsset{xtick={-0.0000075, -0.000005, -0.0000025, 0, 0.0000025, 0.000005, 0.0000075, 0.000010},
   xticklabels={, -5, , 0, , 5, , 10},
@@ -384,6 +365,13 @@ sorting=none
 }
 \begin{frame}{Funktionstest - Zick-Zack bei \SI{100}{\kilo\hertz} und \SI{350}{\kilo\hertz}}
 
+  \begin{itemize}
+    \item Verlauf weicht stark von idealer Kurve ab
+    \begin{itemize}
+      \item reduzierte Auflösung
+      \item DAC träge? 
+    \end{itemize}
+  \end{itemize}
   \begin{figure}
     \begin{tikzpicture}
       \begin{axis}[xlabel={}, xmin=-0.0000075, xmax=0.00001, xticklabels={}]
