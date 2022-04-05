@@ -24,6 +24,7 @@
 }
 % tikz pakete für die Erstellung von plots:
 \usepackage{tikz}
+\usetikzlibrary{positioning}
 \usepackage{pgfplots}
 \usepgfplotslibrary{groupplots}
 \usepgfplotslibrary{units}
@@ -171,50 +172,50 @@ sorting=none
       }
 \end{frame}
 
-\begin{frame}{Komponenten - Rampe}
-  \begin{itemize}
-  \item Abbildung des 24 Bit Zählstands auf 12 Bit Ausgang:
-    $$ y\_out = \frac{(high - low) \cdot o\_count}{cyc\_ticks} $$
-  \end{itemize}
+\begin{frame}[t]{Komponenten - Rampe}
   \begin{figure}
     \includegraphics[scale=0.28]{ramp}
   \end{figure}
+  \begin{itemize}
+    \item Abbildung des 24 Bit Zählstands auf 12 Bit Ausgang:
+    $$ y\_out = (high - low) \cdot o\_count \div cyc\_ticks $$
+  \end{itemize}
 \end{frame}
 
-\begin{frame}{Komponenten - Rampe}
-  \begin{itemize}
-  \item  Abzählen von 64 Taktzyklen
-  \end{itemize}
+\begin{frame}[t]{Komponenten - Rampe}
   \begin{figure}
     \includegraphics[scale=0.28]{ramp_step0}
   \end{figure}
+  \begin{itemize}
+    \item  Abzählen von 64 Taktzyklen
+  \end{itemize}
 \end{frame}
 
-\begin{frame}{Komponenten - Rampe}
-  \begin{itemize}
-    \item Aktivieren von \emph{Counter} und \emph{Division}
-  \end{itemize}
+\begin{frame}[t]{Komponenten - Rampe}
   \begin{figure}
     \includegraphics[scale=0.28]{ramp_step1}
   \end{figure}
+  \begin{itemize}
+    \item Aktivieren von \emph{Counter} und \emph{Division}
+  \end{itemize}
 \end{frame}
 
-\begin{frame}{Komponenten - Rampe}
-  \begin{itemize}
-    \item neuer Zählstand wird mit Amplitude multipliziert und \emph{Division} beginnt zu teilen
-  \end{itemize}
+\begin{frame}[t]{Komponenten - Rampe}
   \begin{figure}
     \includegraphics[scale=0.28]{ramp_step2}
   \end{figure}
+  \begin{itemize}
+    \item neuer Zählstand wird mit Amplitude multipliziert und \emph{Division} beginnt zu teilen
+  \end{itemize}
 \end{frame}
 
-\begin{frame}{Komponenten - Rampe}
-  \begin{itemize}
-    \item untere zwölf Bits von \emph{Q} plus \emph{low} ergeben \emph{y\_out}
-  \end{itemize}
+\begin{frame}[t]{Komponenten - Rampe}
   \begin{figure}
     \includegraphics[scale=0.28]{ramp_step3}
   \end{figure}
+  \begin{itemize}
+    \item untere zwölf Bits von \emph{Q} plus \emph{low} ergeben \emph{y\_out}
+  \end{itemize}
 \end{frame}
 
 \begin{frame}{Komponenten - Zick-Zack}
@@ -237,6 +238,24 @@ sorting=none
   \begin{figure}
     \includegraphics[scale=0.15]{testaufbau_annotated_fg}
   \end{figure}
+\end{frame}
+
+\begin{frame}{Funktionstest - Versuchsdurchführung}
+  \begin{itemize}
+  \item Ausführen und Kontrollieren von jedem Konfigurationsbefehl
+  \item Jede Funktion einmal bei \SI{100}{\hertz} mit $U_{low} = \SI{0}{\volt}$ und $U_{high} = \SI{3.3}{\volt}$ messen
+  \item Zick-Zack-Funktion zur Kontrolle des Frequenzbereichs mit folgenden Frequenzen $f$:
+    \begin{table}
+      \resizebox{0.95\textwidth}{!}{
+        \begin{tabular}{|l|r|r|r|r|r|r|r|r|r|r|}
+          \hline
+          $f$ in Hz & 0,08 & 0,1 & 1 & 10 & 100 & $10^3$ & $10^4$ & $10^5$ & $3,5 \cdot 10^5$ & $10^6$\\ \hline
+        \end{tabular}
+      }
+    \end{table}
+  \item $\SI{0.08}{\hertz} < f_{min}$ und $\SI{1}{\mega\hertz} > f_{max}$
+  \end{itemize}
+
 \end{frame}
 
 \pgfplotsset{
@@ -294,25 +313,6 @@ sorting=none
   \end{figure}
 \end{frame}
 
-% \begin{frame}{Zick-Zack bei $f < f_{min}$ und $f > f_{max}$}
-%   \begin{itemize}
-%   \item Frequenzbereich:
-%     \begin{itemize}
-%       \item $f_{min} = \SI{0.0877}{\hertz}$
-%       \item $f_{max} = \SI{367.5}{\kilo\hertz}$ für die Zick-Zack Funktion
-%       \item $f_{max} = \SI{735}{\kilo\hertz}$ für Rampe und Rechteck
-%     \end{itemize}
-%   \item bei $f < f_{min}$ ist Ausgangsfrequenz \SI{20.5}{\hertz}
-%     \begin{itemize}
-%       \item interner Zählstand für \emph{cyc\_ticks} nicht mehr darstellbar
-%     \end{itemize}
-%   \item bei $f > f_{max}$ wird konstant \SI{0}{\volt} ausgegeben
-%     \begin{itemize}
-%       \item $\emph{cyc\_ticks} / 2 = 1$, \emph{direction} wird nicht mehr getoggelt
-%     \end{itemize}
-%   \end{itemize}
-% \end{frame}
-
 \begin{frame}{Funktionstest - Kontrolle des Frequenzbereichs}
 
   \begin{itemize}
@@ -338,13 +338,13 @@ sorting=none
           x descriptions at=edge bottom,
           y descriptions at=edge left,
           horizontal sep=1cm,
-          vertical sep=0.5cm}]
-        \nextgroupplot[use units=false]
+          vertical sep=0.8cm}]
+        \nextgroupplot[use units=false, title=\SI{100}{\kilo\hertz}]
         \addplot table [x=Time (s), y=Channel 2 (V), col sep=comma, row sep=newline] {../test/zigzag100000Hz_5cyc.csv};
-
-        \nextgroupplot[xlabel=Zeit $t$,
+        \nextgroupplot[title=\SI{350}{\kilo\hertz},
+                       xlabel=Zeit $t$,
                        ylabel=Spannung $U(t)$,
-                       every axis y label/.append style={at=(ticklabel cs:1.1)}] 
+                       every axis y label/.append style={at=(ticklabel cs:1.2)}] 
         \addplot table [x=Time (s), y=Channel 2 (V), col sep=comma, row sep=newline] {../test/zigzag350000Hz_5cyc.csv};
         \end{groupplot}
       \end{tikzpicture}
@@ -359,16 +359,16 @@ sorting=none
   \item Generierung von Funktionen
     \begin{itemize}
       \item zuverlässig von \SI{0.1}{\hertz} bis \SI{10}{\kilo\hertz}
-      \item $U_{high}$ und $U_{low}$ scheinen verschoben zu sein
-      \begin{itemize}
-        \item evtl. ungenaue Referenzspannung, da Referenzpannung der Versorgungsspannung entspricht
-      \end{itemize}
-      \item Darüber hinaus sehr unsaubere Funktionsverläufe
-      \begin{itemize}
+      \item darüber hinaus sehr unsaubere Funktionsverläufe
+        \begin{itemize}
         \item sinkende Auflösung
         \item evtl. zu langsame Änderung des DAC-Ausgangswerts
+        \end{itemize}
+      \item $U_{high}$ und $U_{low}$ scheinen verschoben zu sein
+      \begin{itemize}
+        \item evtl. ungenaue Referenzspannung, da Referenzspannung der Versorgungsspannung entspricht
       \end{itemize}
-    \end{itemize}
+      \end{itemize}
   \end{itemize}
 \end{frame}
 
@@ -408,6 +408,25 @@ sorting=none
 
     \end{tikztimingtable}
   \end{figure}
+\end{frame}
+
+\begin{frame}{Zick-Zack bei $f < f_{min}$ und $f > f_{max}$}
+  \begin{itemize}
+  \item Frequenzbereich:
+    \begin{itemize}
+    \item $f_{min} = \SI{0.0877}{\hertz}$
+    \item $f_{max} = \SI{367.5}{\kilo\hertz}$ für die Zick-Zack Funktion
+    \item $f_{max} = \SI{735}{\kilo\hertz}$ für Rampe und Rechteck
+    \end{itemize}
+  \item bei $f < f_{min}$ ist Ausgangsfrequenz \SI{20.5}{\hertz}
+    \begin{itemize}
+    \item interner Zählstand für \emph{cyc\_ticks} nicht mehr darstellbar
+    \end{itemize}
+  \item bei $f > f_{max}$ wird konstant \SI{0}{\volt} ausgegeben
+    \begin{itemize}
+    \item $\emph{cyc\_ticks} / 2 = 1$, \emph{direction} wird nicht mehr getoggelt
+    \end{itemize}
+  \end{itemize}
 \end{frame}
 
 \end{document}
