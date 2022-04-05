@@ -16,23 +16,26 @@
 \usepackage{hyperref}
 \urlstyle{same}
 
+% units
+\usepackage{siunitx}
+\sisetup{
+  locale = DE ,
+  per-mode = symbol
+}
 % tikz pakete für die Erstellung von plots:
 \usepackage{tikz}
 \usepackage{pgfplots}
 \usepgfplotslibrary{groupplots}
+\usepgfplotslibrary{units}
 \usepackage{tikz-timing} % für timing-diagramme:
-\pgfplotsset{compat=newest}
+\pgfplotsset{compat=newest, unit code/.code 2 args={\si{#1#2}}}
+
 % für hyperlinks:
 \usepackage{hyperref}
 
 %\usepackage{xcolor}
 
 \usepackage{xintbinhex}
-\usepackage{siunitx}
-\sisetup{
-  locale = DE ,
-  per-mode = symbol
-}
 
 \usepackage[
 backend=bibtex,
@@ -80,18 +83,18 @@ sorting=none
 \begin{document}
 
 \begin{frame}
-\titlepage
+  \titlepage
 \end{frame}
-
-%\begin{frame}
-%\tableofcontents
-%\end{frame}
 
 % Konzept
 % Konfiguration - hier kann ich vielleicht das python Interface zeigen
 % Funktionskomponenten
 % Funktionstests
 % Fazit
+
+% \begin{frame}
+%   \tableofcontents
+% \end{frame}
 
 \section{Konzept}
 
@@ -102,54 +105,46 @@ sorting=none
         \item Konstante, Rechteck, Zick-Zack, Rampe
       \end{itemize}
     \item Konfiguration per UART-Schnittstelle
+      \begin{itemize}
+        \item high- und low-Wert, Zykluszeit, dutycycle, Flankensteigung
+      \end{itemize}
   \end{itemize}
 
-\begin{figure}[h] \centering
-  {
-    \pgfplotsset{
-    xtick={0, 15, 30, 45, 60, 75, 90},
-    ytick={0, 0.55, 1.1, 1.65, 2.2, 2.75, 3.3},
-    xmin=0, xmax=90,
-    ymin=-0.2, ymax=3.5,
-    % xlabel=$t$,
-    xticklabels={$0$, , $T$, , $2T$, , $3T$,}, % \pgfmathprintnumber{\tick}},
-    yticklabels={},
-    grid=major,
-    width=0.5\textwidth,
-    height=0.3\textwidth
-  }
-  % constant
+  \begin{figure}
     \begin{tikzpicture}
-      \begin{axis}[yticklabels={$l$, , , , , ,$h$}, ylabel=$U(t)$]
+      \pgfplotsset{
+        xtick={0, 15, 30, 45, 60, 75, 90},
+        ytick={0, 0.55, 1.1, 1.65, 2.2, 2.75, 3.3},
+        xmin=0, xmax=90,
+        ymin=-0.2, ymax=3.5,
+        xticklabels={$0$, , $T$, , $2T$, , $3T$,},
+        yticklabels={$l$, , , , , ,$h$}, 
+        grid=major,
+        width=0.55\textwidth,
+        height=0.33\textwidth}
+      \begin{groupplot}[group style={
+          group size=2 by 2,
+          x descriptions at=edge bottom,
+          xlabels at=edge bottom,
+          y descriptions at=edge left,
+          horizontal sep=0.5cm,
+          vertical sep=0.2cm}]
+        \nextgroupplot
         \addplot[color=blue, line width=1.5pt] coordinates{(0, 3.3)(90, 3.3)};
-      \end{axis}
-    \end{tikzpicture}
-    \label{Concept:Plot:const}
-  % square
-    \begin{tikzpicture}
-      \begin{axis}
-        \addplot[color=blue, line width=1.5pt]  coordinates{(0, 0)(15, 0)(15, 3.3)(30, 3.3)(30, 0)(45, 0)(45, 3.3)(60, 3.3)(60, 0)(75, 0)(75, 3.3)(90, 3.3)};
-      \end{axis}
-    \end{tikzpicture}
-    \label{Concept:Plot:square}
-
-  % zigzag \foreach \x in {0, 15, ..., 90} {(\x, 3.3)}
-    \begin{tikzpicture}
-      \begin{axis}[yticklabels={$l$, , , , , ,$h$}, ylabel=$U(t)$, xlabel=$t$]
+        \nextgroupplot
+        \addplot[color=blue, line width=1.5pt] coordinates{(0, 0)(15, 0)(15, 3.3)(30, 3.3)(30, 0)(45, 0)(45, 3.3)(60, 3.3)(60, 0)(75, 0)(75, 3.3)(90, 3.3)};
+        \nextgroupplot[
+        xlabel=Zeit $t$,
+        every axis x label/.append style={at=(ticklabel cs:1.1)},
+        ylabel=Spannung $U(t)$,
+        every axis y label/.append style={at=(ticklabel cs:1.1)}] 
         \addplot[color=blue, line width=1.5pt] coordinates{(0, 0)(15, 3.3)(30, 0)(45, 3.3)(60, 0)(75, 3.3)(90, 0)};
-      \end{axis}
-    \end{tikzpicture}
-    \label{Concept:Plot:zigzag}
-  % ramp
-    \begin{tikzpicture}
-      \begin{axis}[xlabel=$t$]
+        \nextgroupplot
         \addplot[color=blue, domain=0:90, line width=1.5pt]  coordinates{(0, 0)(30, 3.3)(30, 0)(60, 3.3)(60, 0)(90, 3.3)(90, 0)};
-      \end{axis}
+      \end{groupplot}
     \end{tikzpicture}
-    \label{Concept:Plot:ramp}
-  }
-\end{figure}
-  \end{frame}
+  \end{figure}
+\end{frame}
 
 \begin{frame}{Konzept - Aufbau}
   \begin{itemize}
@@ -174,16 +169,6 @@ sorting=none
       \resizebox{\textwidth}{!}{
         \input{../imgs/config_state_machine}
       }
-\end{frame}
-
-\begin{frame}{Komponenten - Rechteck}
-  \begin{itemize}
-    \item nach 64 steigenden Flanken \emph{Counter} aktivieren
-    \item Ausgang auf \emph{low} wenn \emph{o\_count} $>$ \emph{thresh}, sonst \emph{high} 
-  \end{itemize}
-  \begin{figure}
-    \includegraphics[scale=0.32]{square}
-  \end{figure}
 \end{frame}
 
 \begin{frame}{Komponenten - Rampe}
@@ -242,29 +227,6 @@ sorting=none
   \end{figure}
 \end{frame}
 
-\begin{frame}{Komponenten - Digital-Analog-Konverter}
-  \begin{itemize}
-  \item Implementierung des PmodDA2-Protokolls
-    \begin{itemize}
-      \item $\overline{\mbox{SYNC}}$: Chip-Enable Signal für den DAC
-      \item DINA, DINB: serielle DAC-Daten, aktuell nur Kanal A genutzt
-      \item CLK: DAC-Clock läuft mit \SI{25}{\mega\hertz}
-    \end{itemize}
-  \end{itemize}
-  \begin{figure}[h] \centering
-    \begin{tikztimingtable}
-      Bit Nr.                   & 17{2D{\hexcountmakro}} [white] \\ 
-      parallele Daten           & 33D{0x123}D{}                  \\
-      CLK                       & 34{C}                          \\
-      $\overline{\mbox{SYNC}}$  & H 32L H                        \\
-      DINA                      & 5X 4L 6L 2H 4L 2H 2L 4L 4H L   \\
-      \extracode
-      \vertlines[help lines]{0, 2, ..., 34}
-
-    \end{tikztimingtable}
-  \end{figure}
-\end{frame}
-
 \section{Funktionstest}
 
 \begin{frame}{Funktionstest - Versuchsaufbau}
@@ -277,38 +239,16 @@ sorting=none
   \end{figure}
 \end{frame}
 
-\begin{frame}{Funktionstest - Versuchsdurchführung}
-  \begin{itemize}
-  \item Ausführen und Kontrollieren von jedem Konfigurationsbefehl
-  \item Jede Funktion einmal bei \SI{100}{\hertz} mit $U_{low} = \SI{0}{\volt}$ und $U_{high} = \SI{3.3}{\volt}$ messen
-  \item Zick-Zack-Funktion zur Kontrolle des Frequenzbereichs mit folgenden Frequenzen $f$:
-    \begin{table}
-      \resizebox{0.95\textwidth}{!}{
-      \begin{tabular}{|l|r|r|r|r|r|r|r|r|r|r|}
-        \hline
-        $f$ in Hz & 0,08 & 0,1 & 1 & 10 & 100 & $10^3$ & $10^4$ & $10^5$ & $3,5 \cdot 10^5$ & $10^6$\\ \hline
-      \end{tabular}
-      }
-    \end{table}
-  \item $\SI{0.08}{\hertz} < f_{min}$ und $\SI{1}{\mega\hertz} > f_{max}$
-  \end{itemize}
-
-\end{frame}
-
 \pgfplotsset{
   no markers,
-  grid=major,
-  xlabel=Zeit $t$ in ms,
-  ylabel=$U(t)$ in V,
-  xmin=-0.0075, xmax=0.0075,
-  ymin=-0.2, ymax=3.5,
   scaled x ticks=false,
+  grid=major,
+  x unit=\second,
+  y unit=\volt,
+  ymin=-0.2, ymax=3.5,
   ytick={0, 0.55, 1.10, 1.65, 2.20, 2.75, 3.30},
   yticklabels={0, , 1.10, , 2.20, , 3.30},
-  xtick={-0.0075, -0.005, -0.0025, 0, 0.0025, 0.005, 0.0075},
-  xticklabels={-7.5, -5, -2.5, 0, 2.5, 5, 7.5},
-  width=0.5\textwidth,
-  height=4.5cm}
+}
 
 \begin{frame}{Funktionstest - Funktionsverläufe bei \SI{100}{\hertz}}
   \begin{itemize}
@@ -317,22 +257,37 @@ sorting=none
   \end{itemize}
   \begin{figure}[h]
       \begin{tikzpicture}
+        \pgfplotsset{
+          xmin=-0.0075, xmax=0.0075,
+          xtick={-0.0075, -0.005, -0.0025, 0, 0.0025, 0.005, 0.0075},
+          xticklabels={-7.5, -5, -2.5, 0, 2.5, 5, 7.5},
+          width=0.5\textwidth,
+          height=4cm,
+          x unit prefix=\milli}
+
         \begin{groupplot}[group style={
             group size=2 by 2,
             x descriptions at=edge bottom,
+            xlabels at=edge bottom,
             y descriptions at=edge left,
             horizontal sep=1cm,
             vertical sep=0.5cm}]
-          \nextgroupplot
+
+          % const
+          \nextgroupplot[use units=false]
           \addplot table [x=Time (s), y=Channel 2 (V), col sep=comma, row sep=newline] {../test/const100Hz_small.csv};
-
-          \nextgroupplot
+          % square
+          \nextgroupplot 
           \addplot table [x=Time (s), y=Channel 2 (V), col sep=comma, row sep=newline] {../test/square100Hz_small.csv};
-
-          \nextgroupplot
+          % zigzag
+          \nextgroupplot[
+          xlabel=Zeit $t$,
+          every axis x label/.append style={at=(ticklabel cs:1.1)},
+          ylabel=Spannung $U(t)$,
+          every axis y label/.append style={at=(ticklabel cs:1.1)}] 
           \addplot table [x=Time (s), y=Channel 2 (V), col sep=comma, row sep=newline] {../test/zigzag100Hz_small.csv};
-
-          \nextgroupplot
+          % ramp
+          \nextgroupplot[use units=false]
           \addplot table [x=Time (s), y=Channel 2 (V), col sep=comma, row sep=newline] {../test/ramp100Hz_small.csv};
         \end{groupplot}
       \end{tikzpicture}
@@ -358,31 +313,40 @@ sorting=none
 %   \end{itemize}
 % \end{frame}
 
-\pgfplotsset{xtick={-0.0000075, -0.000005, -0.0000025, 0, 0.0000025, 0.000005, 0.0000075, 0.000010},
-  xticklabels={, -5, , 0, , 5, , 10},
-  yticklabels={0, , 1.10, , 2.20, , 3.30},
-  width=\textwidth, height=4cm
-}
-\begin{frame}{Funktionstest - Zick-Zack bei \SI{100}{\kilo\hertz} und \SI{350}{\kilo\hertz}}
+\begin{frame}{Funktionstest - Kontrolle des Frequenzbereichs}
 
   \begin{itemize}
+    \item bei $f < f_{min}$ kommt es zu Aliasing
+    \item bei $f > f_{max}$ wird konstant \SI{0}{\volt} ausgegeben
     \item Verlauf weicht stark von idealer Kurve ab
     \begin{itemize}
-      \item reduzierte Auflösung
-      \item DAC träge? 
-    \end{itemize}
+      \item reduzierte Auflösung, Trägheit des DACs
+    \end{itemize}  
   \end{itemize}
   \begin{figure}
-    \begin{tikzpicture}
-      \begin{axis}[xlabel={}, xmin=-0.0000075, xmax=0.00001, xticklabels={}]
-          \addplot table [x=Time (s), y=Channel 2 (V), col sep=comma, row sep=newline] {../test/zigzag100000Hz_5cyc.csv};
-        \end{axis}
-      \end{tikzpicture}
+    \pgfplotsset{xmin=-0.0000075,
+                 xmax=0.00001,
+                 xtick={-0.0000075, -0.000005, -0.0000025, 0, 0.0000025, 0.000005, 0.0000075, 0.000010},
+                 xticklabels={, -5, , 0, , 5, , 10},
+                 x unit prefix=\mikro,
+                 width=0.95\textwidth,
+                 height=3.5cm}
 
-      \begin{tikzpicture}
-        \begin{axis}[xlabel=$t$ in µs, xmin=-0.0000075, xmax=0.00001]
-          \addplot table [x=Time (s), y=Channel 2 (V), col sep=comma, row sep=newline] {../test/zigzag350000Hz_5cyc.csv};
-        \end{axis}
+    \begin{tikzpicture}
+      \begin{groupplot}[group style={
+          group size=1 by 2,
+          x descriptions at=edge bottom,
+          y descriptions at=edge left,
+          horizontal sep=1cm,
+          vertical sep=0.5cm}]
+        \nextgroupplot[use units=false]
+        \addplot table [x=Time (s), y=Channel 2 (V), col sep=comma, row sep=newline] {../test/zigzag100000Hz_5cyc.csv};
+
+        \nextgroupplot[xlabel=Zeit $t$,
+                       ylabel=Spannung $U(t)$,
+                       every axis y label/.append style={at=(ticklabel cs:1.1)}] 
+        \addplot table [x=Time (s), y=Channel 2 (V), col sep=comma, row sep=newline] {../test/zigzag350000Hz_5cyc.csv};
+        \end{groupplot}
       \end{tikzpicture}
     \end{figure}
   
@@ -411,6 +375,39 @@ sorting=none
 \begin{frame}{Referenzen}
   Source Code, Anleitung und Python Interface:\\ 
   \href{https://github.com/markushart/studienarbeit_function_generator.git}{\small\texttt{https://github.com/markushart/studienarbeit\_function\_generator.git}}
+\end{frame}
+
+\begin{frame}{Komponenten - Rechteck}
+  \begin{itemize}
+  \item nach 64 steigenden Flanken \emph{Counter} aktivieren
+  \item Ausgang auf \emph{low} wenn \emph{o\_count} $>$ \emph{thresh}, sonst \emph{high} 
+  \end{itemize}
+  \begin{figure}
+    \includegraphics[scale=0.32]{square}
+  \end{figure}
+\end{frame}
+
+\begin{frame}{Komponenten - Digital-Analog-Konverter}
+  \begin{itemize}
+  \item Implementierung des PmodDA2-Protokolls
+    \begin{itemize}
+    \item $\overline{\mbox{SYNC}}$: Chip-Enable Signal für den DAC
+    \item DINA, DINB: serielle DAC-Daten, aktuell nur Kanal A genutzt
+    \item CLK: DAC-Clock läuft mit \SI{25}{\mega\hertz}
+    \end{itemize}
+  \end{itemize}
+  \begin{figure}[h] \centering
+    \begin{tikztimingtable}
+      Bit Nr.                   & 17{2D{\hexcountmakro}} [white] \\ 
+      parallele Daten           & 33D{0x123}D{}                  \\
+      CLK                       & 34{C}                          \\
+      $\overline{\mbox{SYNC}}$  & H 32L H                        \\
+      DINA                      & 5X 4L 6L 2H 4L 2H 2L 4L 4H L   \\
+      \extracode
+      \vertlines[help lines]{0, 2, ..., 34}
+
+    \end{tikztimingtable}
+  \end{figure}
 \end{frame}
 
 \end{document}
