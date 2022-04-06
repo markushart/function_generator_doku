@@ -25,6 +25,9 @@
 % tikz pakete für die Erstellung von plots:
 \usepackage{tikz}
 \usetikzlibrary{positioning}
+\usetikzlibrary{fpu}
+% \usetikzlibrary{intersections}
+% \usetikzlibrary{math}
 \usepackage{pgfplots}
 \usepgfplotslibrary{groupplots}
 \usepgfplotslibrary{units}
@@ -160,18 +163,6 @@ sorting=none
 
 \section{Komponenten}
 
-\begin{frame}{Komponenten - Konfiguration}
-    Aufbau als state machine:
-      \begin{itemize}
-        \item Byteweises Einlesen der UART Rx Signale 
-        \item Interpretation von vier Bytes als Befehl (Befehlscode + Argumente) 
-        \item Berechnung und Speicherung der neuen Konfiguration
-      \end{itemize}
-      \resizebox{\textwidth}{!}{
-        \input{../imgs/config_state_machine}
-      }
-\end{frame}
-
 \begin{frame}[t]{Komponenten - Rampe}
   \begin{figure}
     \includegraphics[scale=0.28]{ramp}
@@ -187,7 +178,7 @@ sorting=none
     \includegraphics[scale=0.28]{ramp_step0}
   \end{figure}
   \begin{itemize}
-    \item  Abzählen von 64 Taktzyklen
+    \item  Abzählen von 68 Taktzyklen
   \end{itemize}
 \end{frame}
 
@@ -226,6 +217,18 @@ sorting=none
   \begin{figure}
     \includegraphics[scale=0.28]{zigzag}
   \end{figure}
+\end{frame}
+
+\begin{frame}{Komponenten - Konfiguration}
+  Aufbau als state machine:
+  \begin{itemize}
+  \item Byteweises Einlesen der UART Rx Signale 
+  \item Interpretation von vier Bytes als Befehl (Befehlscode + Argumente) 
+  \item Berechnung und Speicherung der neuen Konfiguration
+  \end{itemize}
+  \resizebox{\textwidth}{!}{
+    \input{../imgs/config_state_machine}
+  }
 \end{frame}
 
 \section{Funktionstest}
@@ -328,7 +331,7 @@ sorting=none
                  xmax=0.00001,
                  xtick={-0.0000075, -0.000005, -0.0000025, 0, 0.0000025, 0.000005, 0.0000075, 0.000010},
                  xticklabels={, -5, , 0, , 5, , 10},
-                 x unit prefix=\mikro,
+                 x unit prefix=\micro,
                  width=0.95\textwidth,
                  height=3.5cm}
 
@@ -340,16 +343,18 @@ sorting=none
           horizontal sep=1cm,
           vertical sep=0.8cm}]
         \nextgroupplot[use units=false, title=\SI{100}{\kilo\hertz}]
-        \addplot table [x=Time (s), y=Channel 2 (V), col sep=comma, row sep=newline] {../test/zigzag100000Hz_5cyc.csv};
+        \addplot[color=blue] table[x=Time (s), y=Channel 2 (V), col sep=comma, row sep=newline] {../test/zigzag100000Hz_5cyc.csv};
+        \addplot[color=red] table [x=x, y=y, col sep=comma, row sep=newline] {idealzigzag100.csv};
+
         \nextgroupplot[title=\SI{350}{\kilo\hertz},
                        xlabel=Zeit $t$,
                        ylabel=Spannung $U(t)$,
                        every axis y label/.append style={at=(ticklabel cs:1.2)}] 
-        \addplot table [x=Time (s), y=Channel 2 (V), col sep=comma, row sep=newline] {../test/zigzag350000Hz_5cyc.csv};
+        \addplot[color=blue] table [x=Time (s), y=Channel 2 (V), col sep=comma, row sep=newline] {../test/zigzag350000Hz_5cyc.csv};
+        \addplot[color=red] table [x=x, y=y, col sep=comma, row sep=newline] {idealzigzag350.csv};
         \end{groupplot}
       \end{tikzpicture}
     \end{figure}
-  
 \end{frame}
 
 \section{Fazit}
@@ -379,7 +384,7 @@ sorting=none
 
 \begin{frame}{Komponenten - Rechteck}
   \begin{itemize}
-  \item nach 64 steigenden Flanken \emph{Counter} aktivieren
+  \item nach 68 steigenden Flanken \emph{Counter} aktivieren
   \item Ausgang auf \emph{low} wenn \emph{o\_count} $>$ \emph{thresh}, sonst \emph{high} 
   \end{itemize}
   \begin{figure}
