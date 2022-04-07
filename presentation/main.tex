@@ -169,7 +169,7 @@ sorting=none
   \end{figure}
   \begin{itemize}
     \item Abbildung des 24 Bit Zählstands auf 12 Bit Ausgang:
-    $$ y\_out = (high - low) \cdot o\_count \div cyc\_ticks $$
+    $$ y\_out = (high - low) \cdot o\_count \div cyc\_ticks + low$$
   \end{itemize}
 \end{frame}
 
@@ -321,7 +321,7 @@ sorting=none
   \begin{itemize}
     \item bei $f < f_{min}$ kommt es zu Aliasing
     \item bei $f > f_{max}$ wird konstant \SI{0}{\volt} ausgegeben
-    \item bei $f > \SI{10}{\kilo\hertz}$: starke Abweichung von idealer Kurve ab
+    \item bei $f > \SI{10}{\kilo\hertz}$: starke Abweichung von idealer Kurve
     \begin{itemize}
       \item reduzierte Auflösung, Trägheit des DACs
     \end{itemize}  
